@@ -81,7 +81,7 @@ import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
 import com.baidu.mapapi.search.sug.SuggestionResult;
 import com.baidu.mapapi.search.sug.SuggestionSearch;
 import com.baidu.mapapi.search.sug.SuggestionSearchOption;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -134,7 +134,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     public static String mCurrentCity = null;
     private MapView mMapView;
     private static BaiduMap mBaiduMap = null;
-    private static LatLng mMarkLatLngMap = new LatLng(36.547743718042415, 117.07018449827267); // 当前标记的地图点
+    private static LatLng mMarkLatLngMap = null; // 用户选择的位置
     private static String mMarkName = null;
     private GeoCoder mGeoCoder;
     private SensorManager mSensorManager;
@@ -153,7 +153,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     private boolean isMockServStart = false;
     private ServiceGo.ServiceGoBinder mServiceBinder;
     private ServiceConnection mConnection;
-    private FloatingActionButton mButtonStart;
+    private MaterialButton mButtonStart;
+    private AppUpdater updater;
     /*============================== 历史记录 相关 ==============================*/
     private SQLiteDatabase mLocationHistoryDB;
     private SQLiteDatabase mSearchHistoryDB;
@@ -166,10 +167,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     private MenuItem searchItem;
     private SuggestionSearch mSuggestionSearch;
     /*============================== 更新 相关 ==============================*/
-    private DownloadManager mDownloadManager = null;
-    private long mDownloadId;
-    private BroadcastReceiver mDownloadBdRcv;
-    private String mUpdateFilename;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -220,7 +217,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
         initSearchView();
 
-        initUpdateVersion();
+        updater = new AppUpdater(this);
 
         // Custom builds are updated manually; upstream APKs use a different signature.
     }
@@ -228,6 +225,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     @Override
     protected void onPause() {
         XLog.i("MainActivity: onPause");
+        if (updater != null) updater.pause();
         mMapView.onPause();
         mSensorManager.unregisterListener(this);
         super.onPause();
@@ -240,6 +238,8 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         mSensorManager.registerListener(this, mSensorAccelerometer, SensorManager.SENSOR_DELAY_UI);
         mSensorManager.registerListener(this, mSensorMagnetic, SensorManager.SENSOR_DELAY_UI);
         super.onResume();
+        updateLocationPanel();
+        if (updater != null) updater.resume();
     }
 
     @Override
@@ -259,7 +259,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
             stopService(serviceGoIntent);
         }
-        unregisterReceiver(mDownloadBdRcv);
+        if (updater != null) updater.close();
 
         mSensorManager.unregisterListener(this);
 
@@ -325,6 +325,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         });
 
         searchView = (SearchView) searchItem.getActionView();
+        searchView.setQueryHint(getString(R.string.search_hint_short));
         searchView.setIconified(false);// 设置searchView处于展开状态
         searchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
         searchView.setIconifiedByDefault(true);//默认为true在框内，设置false则在框外
@@ -433,10 +434,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_dev));
                 }
             } else if (id == R.id.nav_update) {
-                checkUpdateVersion(true);
+                updater.check(true);
             } else if (id == R.id.nav_feedback) {
-                File file = new File(getExternalFilesDir("Logs"), GoApplication.LOG_FILE_NAME);
-                ShareUtils.shareFile(this, file, item.getTitle().toString());
+                openWebPage("https://github.com/slayercjc/GoGoGo/issues/new/choose");
             } else if (id == R.id.nav_contact) {
                 Uri uri = Uri.parse("https://github.com/slayercjc");
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
@@ -476,6 +476,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
              */
             @Override
             public void onMapClick(LatLng point) {
+                mMarkName = null;
                 mMarkLatLngMap = point;
                 markMap();
 
@@ -487,6 +488,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
              */
             @Override
             public void onMapPoiClick(MapPoi poi) {
+                mMarkName = poi.getName();
                 mMarkLatLngMap = poi.getPosition();
                 markMap();
                 //百度坐标系转wgs坐标系
@@ -553,6 +555,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     XLog.i("逆地理位置失败!");
                 } else {
                     mMarkName = String.valueOf(reverseGeoCodeResult.getAddress());
+                    updateLocationPanel();
                     poiLatitude.setText(String.valueOf(reverseGeoCodeResult.getLocation().latitude));
                     poiLongitude.setText(String.valueOf(reverseGeoCodeResult.getLocation().longitude));
                     poiAddress.setText(reverseGeoCodeResult.getAddress());
@@ -607,9 +610,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                         if (isFirstLoc) {
                             isFirstLoc = false;
                             // 这里记录百度地图返回的位置
-                            mMarkLatLngMap = new LatLng(bdLocation.getLatitude(), bdLocation.getLongitude());
+                            LatLng currentLocation = new LatLng(bdLocation.getLatitude(), bdLocation.getLongitude());
                             MapStatus.Builder builder = new MapStatus.Builder();
-                            builder.target(mMarkLatLngMap).zoom(18.0f);
+                            builder.target(currentLocation).zoom(18.0f);
                             mBaiduMap.animateMapStatus(MapStatusUpdateFactory.newMapStatus(builder.build()));
 
                             XLog.i("First Baidu LatLng: " + mMarkLatLngMap);
@@ -750,6 +753,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
     //标定选择的位置
     private void markMap() {
+        updateLocationPanel();
         if (mMarkLatLngMap != null) {
             MarkerOptions ooA = new MarkerOptions().position(mMarkLatLngMap).icon(mMapIndicator);
             mBaiduMap.clear();
@@ -760,6 +764,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     private void resetMap() {
         mBaiduMap.clear();
         mMarkLatLngMap = null;
+        updateLocationPanel();
 
         MyLocationData locData = new MyLocationData.Builder()
                 .latitude(mCurrentLat)
@@ -866,6 +871,18 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     private void initGoBtn() {
         mButtonStart = findViewById(R.id.faBtnStart);
         mButtonStart.setOnClickListener(this::doGoLocation);
+        findViewById(R.id.location_stop).setOnClickListener(v -> {
+            stopGoLocation();
+            updateLocationPanel();
+        });
+        MaterialButton toggle = findViewById(R.id.panel_toggle);
+        toggle.setOnClickListener(v -> {
+            View details = findViewById(R.id.location_details);
+            boolean expanded = details.getVisibility() == View.VISIBLE;
+            details.setVisibility(expanded ? View.GONE : View.VISIBLE);
+            toggle.setText(expanded ? R.string.panel_expand : R.string.panel_collapse);
+        });
+        updateLocationPanel();
     }
 
     private boolean startGoLocation() {
@@ -902,6 +919,11 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     }
 
     private void doGoLocation(View v) {
+        if (isMockServStart && mMarkLatLngMap == null) {
+            stopGoLocation();
+            updateLocationPanel();
+            return;
+        }
         if (!GoUtils.isNetworkAvailable(this)) {
             GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_network));
             return;
@@ -923,7 +945,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 stopGoLocation();
                 Snackbar.make(v, "模拟位置已终止", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
-                mButtonStart.setImageResource(R.drawable.ic_position);
+                mButtonStart.setIconResource(R.drawable.ic_position);
             } else {
                 double[] latLng = MapUtils.bd2wgs(mMarkLatLngMap.longitude, mMarkLatLngMap.latitude);
                 double alt = Double.parseDouble(sharedPreferences.getString("setting_altitude", "55.0"));
@@ -939,6 +961,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
                 mBaiduMap.clear();
                 mMarkLatLngMap = null;
+                updateLocationPanel();
 
                 if (GoUtils.isWifiEnabled(MainActivity.this)) {
                     GoUtils.showDisableWifiDialog(MainActivity.this);
@@ -954,13 +977,14 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                             .setAction("Action", null).show();
                 } else {
                     if (!startGoLocation()) return;
-                    mButtonStart.setImageResource(R.drawable.ic_fly);
+                    mButtonStart.setIconResource(R.drawable.ic_fly);
                     Snackbar.make(v, "正在启动模拟位置", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
 
                     recordCurrentLocation(mMarkLatLngMap.longitude, mMarkLatLngMap.latitude);
                     mBaiduMap.clear();
                     mMarkLatLngMap = null;
+                    updateLocationPanel();
 
                     if (GoUtils.isWifiEnabled(MainActivity.this)) {
                         GoUtils.showDisableWifiDialog(MainActivity.this);
@@ -1070,7 +1094,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             if (searchIsLoc.equals("1")) {
                 String lng = ((TextView) view.findViewById(R.id.search_longitude)).getText().toString();
                 String lat = ((TextView) view.findViewById(R.id.search_latitude)).getText().toString();
-                // mMarkName = ((TextView) view.findViewById(R.id.poi_name)).getText().toString();
+                mMarkName = searchKey;
                 mMarkLatLngMap = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
                 MapStatusUpdate mapstatusupdate = MapStatusUpdateFactory.newLatLng(mMarkLatLngMap);
                 mBaiduMap.setMapStatus(mapstatusupdate);
@@ -1187,67 +1211,26 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     }
 
     /*============================== 更新 相关 ==============================*/
-    private void initUpdateVersion() {
-        mDownloadManager =(DownloadManager) MainActivity.this.getSystemService(DOWNLOAD_SERVICE);
-
-        // 用于监听下载完成后，转到安装界面
-        mDownloadBdRcv = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1) == mDownloadId
-                        && mDownloadId > 0) installNewVersion();
-            }
-        };
-        androidx.core.content.ContextCompat.registerReceiver(this, mDownloadBdRcv,
-                new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-                androidx.core.content.ContextCompat.RECEIVER_EXPORTED);
-    }
-
-    private void checkUpdateVersion(boolean result) {
-        startActivity(new Intent(Intent.ACTION_VIEW,
-                Uri.parse("https://github.com/slayercjc/GoGoGo/releases")));
-    }
-
-    private void downloadNewVersion(String url) {
-        if (mDownloadManager == null) {
-            return;
-        }
-
-        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-        request.setAllowedOverRoaming(false);
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        request.setTitle(GoUtils.getAppName(this));
-        request.setDescription("正在下载新版本...");
-        request.setMimeType("application/vnd.android.package-archive");
-
-        // DownloadManager不会覆盖已有的同名文件，需要自己来删除已存在的文件
-        File file = new File(getExternalFilesDir("Updates"), mUpdateFilename);
-        if (file.exists()) {
-            if(!file.delete()) {
-                return;
-            }
-        }
-        request.setDestinationUri(Uri.fromFile(file));
-
-        mDownloadId = mDownloadManager.enqueue(request);
-    }
-
-    private void installNewVersion() {
-        Intent install = new Intent(Intent.ACTION_VIEW);
-        Uri downloadFileUri = mDownloadManager.getUriForDownloadedFile(mDownloadId);
-        File file = new File(getExternalFilesDir("Updates"), mUpdateFilename);
-        if (downloadFileUri != null) {
-            install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            // 在Broadcast中启动活动需要添加Intent.FLAG_ACTIVITY_NEW_TASK
-            install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);    //添加这一句表示对目标应用临时授权该Uri所代表的文件
-            install.addCategory("android.intent.category.DEFAULT");
-            install.setDataAndType(ShareUtils.getUriFromFile(MainActivity.this, file), "application/vnd.android.package-archive");
-            startActivity(install);
+    private void updateLocationPanel() {
+        if (mButtonStart == null) return;
+        TextView status = findViewById(R.id.location_status);
+        TextView title = findViewById(R.id.location_title);
+        TextView coordinates = findViewById(R.id.location_coordinates);
+        status.setText(isMockServStart ? R.string.location_active : R.string.location_idle);
+        findViewById(R.id.location_stop).setVisibility(isMockServStart ? View.VISIBLE : View.GONE);
+        if (mMarkLatLngMap != null) {
+            title.setText(TextUtils.isEmpty(mMarkName) ? "已选择地图位置" : mMarkName);
+            coordinates.setText(String.format(java.util.Locale.CHINA, "百度坐标  %.6f, %.6f", mMarkLatLngMap.latitude, mMarkLatLngMap.longitude));
         } else {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + getPackageName()));
-            intent.addCategory("android.intent.category.DEFAULT");
-            startActivity(intent);
+            title.setText(isMockServStart ? "正在模拟你选择的位置" : getString(R.string.location_choose));
+            coordinates.setText(isMockServStart ? "再次选点可传送，点击停止可结束" : getString(R.string.location_hint));
         }
+        mButtonStart.setText(isMockServStart ? (mMarkLatLngMap == null ? R.string.location_running : R.string.location_move) : R.string.location_start);
+        mButtonStart.setEnabled(mMarkLatLngMap != null);
+    }
+
+    private void openWebPage(String url) {
+        try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))); }
+        catch (android.content.ActivityNotFoundException e) { GoUtils.DisplayToast(this, "未找到浏览器，请安装浏览器后重试"); }
     }
 }

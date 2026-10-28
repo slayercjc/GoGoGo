@@ -1,42 +1,32 @@
 <resources>
-
-    <!-- 系统主题默认主题. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.Material3.DayNight">
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimary</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="buttonStyle">@style/AppTheme.Button</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorPrimaryContainer">@color/brand_container</item>
+        <item name="colorOnPrimaryContainer">@color/brand_text</item>
+        <item name="colorSecondary">@color/colorAccent</item>
+        <item name="colorOnSecondary">@color/on_primary</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/text_main</item>
+        <item name="colorSurfaceVariant">@color/brand_container</item>
+        <item name="colorOnSurfaceVariant">@color/text_muted</item>
+        <item name="android:colorBackground">@color/page_background</item>
+        <item name="android:windowBackground">@color/page_background</item>
+        <item name="android:statusBarColor">@color/page_background</item>
+        <item name="android:navigationBarColor">@color/page_background</item>
+        <item name="android:windowLightStatusBar">@bool/light_system_bars</item>
+        <item name="android:windowLightNavigationBar">@bool/light_system_bars</item>
+        <item name="colorAccent">@color/colorPrimary</item>
+        <item name="android:fontFamily">sans</item>
     </style>
-
-    <!-- 无ActionBar -->
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
+    <style name="AppTheme.NoActionBar"><item name="windowActionBar">false</item><item name="windowNoTitle">true</item></style>
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.Material3.ActionBar"/>
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3"/>
+    <style name="RippleWhite" parent="ThemeOverlay.Material3"/>
+    <style name="DialogAnimFadeInFadeOut" parent="android:Animation"><item name="android:windowEnterAnimation">@anim/anim_fade_in</item><item name="android:windowExitAnimation">@anim/anim_fade_out</item></style>
+    <style name="AppTheme.Button" parent="Widget.Material3.Button"/>
+    <style name="HuanWei.MapButton">
+        <item name="android:layout_width">48dp</item><item name="android:layout_height">48dp</item>
+        <item name="android:padding">12dp</item><item name="android:background">?attr/selectableItemBackgroundBorderless</item>
     </style>
-
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-    <!-- 参考 https://blog.csdn.net/qq_37299249/article/details/78536772 -->
-    <style name="RippleWhite"  parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- 点击后波纹的颜色 -->
-        <item name="android:colorControlHighlight">#C8C9CA</item>
-        <!-- 效果半径-->
-        <item name="android:radius">14dp</item>
-    </style>
-
-    <!-- dialog动画 -->
-    <style name="DialogAnimFadeInFadeOut" parent="android:Animation">
-        <item name="android:windowEnterAnimation">@anim/anim_fade_in</item>
-        <item name="android:windowExitAnimation">@anim/anim_fade_out</item>
-    </style>
-
-    <!-- https://stackoverflow.com/questions/26346727/android-material-design-button-styles-->
-    <!-- Button -->
-    <style name="AppTheme.Button" parent="Widget.AppCompat.Button.Colored">
-        <item name="colorButtonNormal">@color/colorAccent</item>
-    </style>
-
 </resources>

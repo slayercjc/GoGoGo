@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdk 36
+    buildFeatures { buildConfig true }
     defaultConfig {
         applicationId "com.zcshou.gogogo"
         manifestPlaceholders = [BAIDU_MAP_AK: providers.gradleProperty('BAIDU_MAP_AK')
@@ -9,8 +10,8 @@ android {
         minSdkVersion 27
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 36
-        versionCode 1122
-        versionName '1.0' // https://semver.org/lang/zh-CN/
+        versionCode 1123
+        versionName '1.1' // https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         resConfigs 'zh', 'zh-rCN', 'en', 'en-rUS'
         ndk {
@@ -97,9 +98,11 @@ dependencies {
     implementation 'com.elvishew:xlog:1.11.1'
     implementation 'io.noties.markwon:core:4.6.2'
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.json:json:20240303'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test:runner:1.6.2'
     androidTestImplementation('androidx.test.espresso:espresso-core:3.5.1', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 }
+

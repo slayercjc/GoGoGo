@@ -1,36 +1,24 @@
 ---
-name: 报告缺陷 / Bug Report
-about: If you find some bugs, please use this template.
-title: "[BUG] New BUG"
-labels: bug
+name: 问题反馈
+about: 报告幻位的安装、地图、定位或更新问题
+title: '[问题] '
+labels: ''
 assignees: ''
-
 ---
 
-<!-- ⚠️⚠️ 不要删除这些注释 ⚠️⚠️ -->
-<!-- ⚠️⚠️ DO NOT Delete those comments! ⚠️⚠️ -->
-<!-- 请先搜索有无同类缺陷，避免报告重复缺陷 -->
-<!-- Please search existing issues to avoid creating duplicates. -->
+### 设备与版本
+- 手机型号：
+- Android / HyperOS 等系统版本：
+- 幻位版本（设置中查看）：
+- 安装来源（Releases / Actions / 自行编译）：
 
-### 缺陷描述 / Bug description
+### 问题描述
 
+### 复现步骤
+1.
+2.
 
+### 预期行为与实际行为
 
-<!-- 请在上方详细地描述缺陷。 -->
-<!-- Please describe the bug in detail above. -->
-
-### 版本信息 / Version Info
-
-- 影梭版本 / GoGoGo Version : 
-- 系统版本 / OS Version : 
-
-<!-- 请在上方描述有缺陷的影梭版本及使用的系统版本。 -->
-<!-- Please describe version of GoGoGo and used OS above. -->
-
-### 复现步骤 / Steps to Reproduce
-
-1. 
-2. 
-
-<!-- 请在上方描述如何复现该缺陷。-->
-<!-- Please describe how to reproduce the bug. -->
+### 截图或错误码（可选）
+请隐藏地址、坐标等个人信息。请勿上传百度 AK、签名文件或密码。

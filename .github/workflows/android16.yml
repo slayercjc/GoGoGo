@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - android16-baidu
+    tags:
+      - "v*"
   workflow_dispatch:
     inputs:
       mode:
@@ -34,7 +36,7 @@ jobs:
       - name: Install Android SDK
         run: sdkmanager "platforms;android-36" "build-tools;35.0.0"
       - name: Validate signing inputs
-        if: inputs.mode == 'signed-apk' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[signed-apk]'))
+        if: inputs.mode == 'signed-apk' || startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[signed-apk]'))
         shell: bash
         env:
           BAIDU_MAP_AK: ${{ secrets.BAIDU_MAP_AK }}
@@ -55,12 +57,12 @@ jobs:
           BAIDU_MAP_AK: ${{ secrets.BAIDU_MAP_AK }}
         run: bash ./gradlew --no-daemon :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
       - name: Build release
-        if: inputs.mode == 'signed-apk' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[signed-apk]'))
+        if: inputs.mode == 'signed-apk' || startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[signed-apk]'))
         env:
           BAIDU_MAP_AK: ${{ secrets.BAIDU_MAP_AK }}
         run: bash ./gradlew --no-daemon :app:assembleRelease
       - name: Sign and verify APK
-        if: inputs.mode == 'signed-apk' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[signed-apk]'))
+        if: inputs.mode == 'signed-apk' || startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[signed-apk]'))
         shell: bash
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -82,16 +84,23 @@ jobs:
           fi
           tools="$ANDROID_HOME/build-tools/35.0.0"
           "$tools/zipalign" -P 16 -f 4 "${apks[0]}" "$RUNNER_TEMP/aligned.apk"
-          "$tools/apksigner" sign --ks "$keyfile" --ks-key-alias "$ANDROID_KEY_ALIAS" --ks-pass env:ANDROID_STORE_PASSWORD --key-pass env:ANDROID_KEY_PASSWORD --out dist/HuanWei-1.0.apk "$RUNNER_TEMP/aligned.apk"
-          "$tools/apksigner" verify --verbose --print-certs dist/HuanWei-1.0.apk > dist/signature-report.txt
-          "$tools/zipalign" -c -P 16 -v 4 dist/HuanWei-1.0.apk > dist/zip-alignment.txt
+          "$tools/apksigner" sign --ks "$keyfile" --ks-key-alias "$ANDROID_KEY_ALIAS" --ks-pass env:ANDROID_STORE_PASSWORD --key-pass env:ANDROID_KEY_PASSWORD --out dist/HuanWei.apk "$RUNNER_TEMP/aligned.apk"
+          "$tools/apksigner" verify --verbose --print-certs dist/HuanWei.apk > dist/signature-report.txt
+          "$tools/zipalign" -c -P 16 -v 4 dist/HuanWei.apk > dist/zip-alignment.txt
           grep -i 'certificate SHA-1 digest: cd6a44cd781be47f1490675e24e82759c900595b' dist/signature-report.txt
-          sha256sum dist/HuanWei-1.0.apk > dist/SHA256SUMS.txt
+          python scripts/create_update_manifest.py dist/HuanWei.apk "$tools/aapt"
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            version=$(python -c 'import json; print(json.load(open("dist/update.json"))["versionName"])')
+            if [[ "$GITHUB_REF_NAME" != "v$version" ]]; then
+              echo "::error::Tag does not match APK versionName"
+              exit 1
+            fi
+          fi
       - name: Upload signed APK
-        if: inputs.mode == 'signed-apk' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[signed-apk]'))
+        if: inputs.mode == 'signed-apk' || startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[signed-apk]'))
         uses: actions/upload-artifact@v4
         with:
-          name: HuanWei-1.0-signed
+          name: HuanWei-signed
           path: dist/
           if-no-files-found: error
           retention-days: 14
@@ -103,3 +112,22 @@ jobs:
           path: app/build/reports/
           if-no-files-found: ignore
           retention-days: 14
+
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: HuanWei-signed
+          path: dist
+      - name: Publish verified release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release create "$RELEASE_TAG" dist/*.apk dist/update.json dist/SHA256SUMS.txt --verify-tag --generate-notes --title "幻位 $RELEASE_TAG" --latest

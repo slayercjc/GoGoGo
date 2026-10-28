@@ -136,4 +136,11 @@
     <string name="update_commit">提交信息：</string>
 
     <!-- 注册 -->
+
+<string name="brand_tagline">虚拟定位 · 自由探索</string><string name="brand_developer">Slayercjc · 基于 GoGoGo 开源项目</string>
+<string name="search_hint_short">搜索地点，开启探索</string><string name="location_idle">准备就绪</string><string name="location_active">模拟定位运行中</string>
+<string name="location_choose">选择你的目的地</string><string name="location_hint">点击地图选点，或使用顶部搜索</string>
+<string name="location_start">开始定位</string><string name="location_move">传送到此处</string><string name="location_stop">停止</string><string name="location_running">定位中</string>
+<string name="panel_collapse">收起</string><string name="panel_expand">展开</string>
 </resources>
+

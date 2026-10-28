@@ -1,107 +1,87 @@
-<p align="center">
-<img src="./docs/images/LOGO.png" height="80"/>
-</p>
-
 <div align="center">
 
-[![GitHub stars](https://img.shields.io/github/stars/ZCShou/GoGoGo?logo=github)](https://github.com/ZCShou/GoGoGo/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/ZCShou/GoGoGo?logo=github)](https://github.com/ZCShou/GoGoGo/network)
-[![license](https://img.shields.io/github/license/ZCShou/GoGoGo)](https://github.com/ZCShou/GoGoGo/blob/master/LICENSE)
-[![GitHub Release](https://img.shields.io/github/v/release/ZCShou/GoGoGo?label=Release)](https://github.com/ZCShou/GoGoGo/releases)
-[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
-</div>
-<div align="center">
+<img src="https://raw.githubusercontent.com/slayercjc/GoGoGo/android16-baidu/docs/huanwei-icon.svg" width="112" alt="幻位图标" />
 
-[![Build Check](https://github.com/ZCShou/GoGoGo/actions/workflows/build-check.yml/badge.svg)](https://github.com/ZCShou/GoGoGo/actions/workflows/build-check.yml)
-[![CodeQL](https://github.com/ZCShou/GoGoGo/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/ZCShou/GoGoGo/actions/workflows/codeql-analysis.yml)
-</div>
+# 幻位 · HuanWei
 
-<div align="center">
-影梭 - 用于 Android 8.0+ 的无需 ROOT 权限的虚拟定位 APP
+**虚拟定位 · 自由探索**
+
+蓝紫色原生 Android 定位工具，由 **Slayercjc** 维护，基于 [ZCShou/GoGoGo](https://github.com/ZCShou/GoGoGo) v1.12.2 修改。
+
+[下载安装](https://github.com/slayercjc/GoGoGo/releases) · [问题反馈](https://github.com/slayercjc/GoGoGo/issues/new/choose) · [源码分支](https://github.com/slayercjc/GoGoGo/tree/android16-baidu) · [开发者](https://github.com/slayercjc)
+
 </div>
 
-## 简介
-&emsp;&emsp;影梭是一个基于 Android 调试 API + 百度地图及定位 SDK 实现的安卓定位修改工具，并且同时实现了一个可以自由控制移动的摇杆。使用影梭，不需要 ROOT 权限就可以随意修改自己的当前位置以及模拟移动。
+## 当前开发版本
 
-1. 源码仓库：[Github](https://github.com/ZCShou/GoGoGo)（推荐）、[Gitee](https://gitee.com/itexp/gogogo)（镜像）
-2. 下载地址：[Github](https://github.com/ZCShou/GoGoGo/releases)（推荐）、[Gitee](https://gitee.com/itexp/gogogo/releases)（镜像）
+**幻位 1.1** · Android 16 适配分支：`android16-baidu`。
 
-## 警告一
-&emsp;&emsp;**最近，有网友直接白嫖影梭后改名为标枪定位，然后添加广告（除了加广告，功能没有任何改变），但是，没有按照 GPLv3 协议的要求进行开源（我已经联系过该网友进了提醒，但并没有收到回复），在此提醒：**
-1. **开源 ≠ 白嫖，请遵循开源协议**
-2. **GPL 的法律效力在国内相关诉讼案例很多，请自行搜索，权衡利弊。影梭保留追究相关侵权人员法律责任的所有权利！**
-3. **开源不易，且行且珍惜**
-
-## 警告二
-&emsp;&emsp;**最近，有很多人将影梭用在校园运动类 APP（包括但不限于闪动校园、TakeTwo、运动世界校园等）中作弊，开发者也收到了很多人提问为何影梭定位并不起作用或者寻求对影梭的改进，在此提醒：**
-1. **影梭不支持任何校园运动类 APP 的作弊行为**
-2. **影梭开发者也不赞同采用任何形式在校园运动中作弊**
-
-## 背景
-&emsp;&emsp;之前在玩一款 VR 游戏：一起来捉妖。为了省事，就想有没有可以更改位置的 APP。经过一番摸索发现确实有不少可以修改位置的 APP。但是，绝大多数这种 APP 都是收费的，而且贼贵！
-
-&emsp;&emsp;我比较感兴趣的是这样的技术是如何实现的，因此，决定研究研究自己写一个！现在游戏已经弃坑了，但是技术不能丢。因此，将研究结果开源出来方便大家一起学习！但是请注意（重要的事情说三遍！否则后果自负）：
-
-1. 该 APP 仅仅是为了学习 Android + 百度地图的实现方法，请勿用于游戏作弊！
-2. 该 APP 仅仅是为了学习 Android + 百度地图的实现方法，请勿用于游戏作弊！
-3. 该 APP 仅仅是为了学习 Android + 百度地图的实现方法，请勿用于游戏作弊！
+本仓库的默认分支 master 保留上游代码；幻位的功能修改、构建工作流和文档位于 **android16-baidu**。下载、构建和提交改动时请选对分支。README 同步展示在仓库首页，不代表 master 的源码已经替换。
 
 ## 功能
-1. 定位修改
-2. 摇杆控制移动
-3. 历史记录
-4. 位置搜索
-5. 直接输入坐标
 
-## 截图
-![joystick.jpg](./docs/images/joystick.jpg)
-![search_history.jpg](./docs/images/search_history.jpg)
-![map.jpg](./docs/images/map.jpg)
+- 百度地图地点搜索、地图选点、坐标输入和普通／卫星地图切换。
+- Android 模拟位置服务，以及悬浮摇杆移动。
+- 定位历史与搜索历史。
+- 与应用图标配套的蓝紫色界面、悬浮工具栏、可收起的定位卡片和独立停止按钮。
+- 跟随系统的浅色／深色界面；地图底图仍由百度 SDK 提供。
+- 从本仓库 Releases 检查更新，可选择仅 Wi-Fi 自动下载，校验后调用系统安装器。
+- 应用内问题反馈直达本项目 Issues。
 
-## 用法
-1. 下载 APK 直接安装
-2. 启动影梭，赋予相关权限
-3. 单击地图位置，然后点击启动按钮
+## 下载与使用
 
-## 文档
-&emsp;&emsp;由于本人并不是做移动开发的，很多功能代码写的都比较差。我也第一次写  Android APP，目前还处在学习中。。。此外，就一个简单的 APP，应该也不需要啥文档，开发过程中遇到的一些问题，我一般都会记录在个人博客中，具体参见：https://blog.csdn.net/zcshoucsdn/category_10559121.html
+1. 在 [Releases](https://github.com/slayercjc/GoGoGo/releases) 下载正式签名 APK；如尚未发布，请在 [Actions](https://github.com/slayercjc/GoGoGo/actions/workflows/android16.yml) 成功的签名构建中下载 `HuanWei-signed` 并解压。
+2. 安装后按界面提示授予定位、通知和悬浮窗权限。
+3. 打开手机开发者选项，在“选择模拟位置信息应用”中选择 **幻位**。
+4. 在地图上选点或搜索地点，点击“开始定位”；运行时可选新位置传送，点击“停止”结束。
 
-&emsp;&emsp;如果有疑问可以直接搜索 ISSUE 或者 在上面直接提交问题。
+覆盖升级请使用同一签名的安装包，无需先卸载。幻位 1.0 尚无应用内下载更新功能，需要手动安装一次 1.1。系统仍可能要求确认安装，应用不承诺静默安装。
 
-## 参考
-&emsp;&emsp;由于本人也是个新手，纯属业余瞎搞，因此，在写影梭的过程中，参考了很多网友分享的技术文章、示例代码等。包括但不限于以下列出的几个：
-1. https://github.com/Hilaver/MockGPS
-2. https://github.com/bxxfighting/together-go
-3. https://github.com/P72B/Mocklation
+## 兼容情况
 
-&emsp;&emsp;还有些 CSDN 上的文章，目前不记得地址了，如果您发现其中有直接引用或借鉴您的地方，请与我联系，我会再第一时间进行处理，谢谢！
+| 项目 | 当前情况 |
+| --- | --- |
+| 最低系统 | Android 8.1（API 27） |
+| 编译／目标 API | Android 16（API 36） |
+| 安装包架构 | arm64-v8a |
+| 已有使用反馈 | 小米 15 Pro / HyperOS 3.0.309.0，前一签名版用户反馈基本可用 |
+| 新界面与更新流程 | 以 Actions 检查和后续真机测试结果为准 |
 
-## FAQ
-Q：为何不支持 Android 8.0 以下版本？
+不同手机系统和其他应用对模拟位置的处理可能不同。不能保证所有应用采用模拟位置，也不保证所有 Android 16 设备均可用。ZIP 对齐检查不等于完整的 16 KB 原生库兼容认证。
 
-A：因为手里没有机器无法进行适配。。。
+## 自己编译与百度地图接入
 
-Q：为何定位不是很稳定，偶尔会飘回真实位置？
+使用 JDK 17、Gradle Wrapper 和 Android SDK 36。地图使用百度 Android SDK，需要申请自己的 AK，绑定 **包名 + APK 签名证书 SHA-1**。
 
-A：这是是由于实现原理导致的，Android 调试 API 固有的问题。确切的说，应该是由于手机本身还开启了其他定位方式（例如，基站定位、wifi定位等）导致的
+- 包名：`com.zcshou.gogogo`（保持与现有安装和百度 AK 一致）。
+- AK 通过 `BAIDU_MAP_AK` 环境变量或 Gradle 属性注入，不写死在源码中。
+- GitHub Actions 签名构建所需 Secrets：`BAIDU_MAP_AK`、`ANDROID_KEYSTORE_BASE64`、`ANDROID_STORE_PASSWORD`、`ANDROID_KEY_ALIAS`、`ANDROID_KEY_PASSWORD`。
+- Debug 与 Release 证书不同；只为 Release 证书配置的 AK 不一定能让本地 Debug 地图正常显示。
 
-Q：是否支持鸿蒙系统？
+详细步骤：[百度地图申请、签名与 GitHub 云编译教程](https://github.com/slayercjc/GoGoGo/blob/android16-baidu/docs/BAIDU_GITHUB_GUIDE.zh-CN.md)。
 
-A：经过测试，影梭可以在鸿蒙系统上正常运行。
+```bash
+git clone --branch android16-baidu https://github.com/slayercjc/GoGoGo.git
+cd GoGoGo
+./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
+```
 
-Q：为何在微信等腾讯系应用上定位不起作用？
+## 发布与自动更新
 
-A：建议去问一下腾讯。
+发布新版本时递增 `versionCode`，设置新的 `versionName`，沿用原有签名。构建会从实际 APK 自动生成 `update.json`，包含版本、文件长度与 SHA-256。把它与 APK 一起上传到最新正式 Release，应用才能识别和下载。
 
-Q：编译时 java 报错？
+应用下载后还会校验包名、版本和签名。下载由 Android 系统管理；无网络或 GitHub 暂不可达时可稍后重试。
 
-A：Gradle 使用的 java 版本与 Android Studio 使用的不一致。Gradle 默认会在环境变量中搜索 JAVA_HOME 来确定 Java 位置。
+完整操作：[发布新版和自动更新说明](https://github.com/slayercjc/GoGoGo/blob/android16-baidu/docs/RELEASING.zh-CN.md)。
 
-## 如何贡献
-1. FORK -> PR
-2. 加入影梭开发，共同完善
+## 问题反馈
 
-## 许可证
-GPL-3.0-only © ZCShou
+请到 [Issues](https://github.com/slayercjc/GoGoGo/issues) 提交手机型号、系统版本、幻位版本、问题描述和复现步骤。地图空白请附百度鉴权错误码（如有），**不要提交 AK、签名私钥或密码**。提交截图或日志前请自行隐藏不希望公开的地址、坐标等信息。
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FZCShou%2FGoGoGo.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2FZCShou%2FGoGoGo?ref=badge_large&issueType=license)
+## 开源与致谢
+
+本分支没有新增收费解锁、支付 SDK 或订阅功能。百度地图服务的额度和收费以百度开放平台当前规则为准。
+
+感谢原作者 **ZCShou** 和 GoGoGo 贡献者，以及百度地图 SDK、AndroidX、Material Components 等项目。上游版权声明保留，代码按仓库 [GPL-3.0 许可证](https://github.com/slayercjc/GoGoGo/blob/android16-baidu/LICENSE) 分发；第三方组件遵循各自许可证。
+
+本工具用于开发、学习和获授权的定位测试。

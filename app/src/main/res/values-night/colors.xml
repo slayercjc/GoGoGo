@@ -1,0 +1,6 @@
+<resources>
+<color name="colorPrimary">#B7BFFF</color><color name="colorPrimaryDark">#939FEF</color><color name="colorAccent">#74DCEB</color>
+<color name="on_primary">#202D7D</color><color name="surface">#202336</color><color name="page_background">#151827</color>
+<color name="text_main">#EBEDFF</color><color name="text_muted">#B9BDD2</color><color name="brand_container">#30395E</color>
+<color name="brand_text">#DCE0FF</color><color name="outline_soft">#3D425D</color>
+</resources>

@@ -1,76 +1,22 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <com.google.android.material.appbar.AppBarLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="@style/AppTheme.AppBarOverlay">
-
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="@color/colorPrimary"
-                app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-        </com.google.android.material.appbar.AppBarLayout>
-
-        <include
-            layout="@layout/main_map"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="?attr/actionBarSize" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/faBtnStart"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|start"
-            android:layout_marginStart="30dp"
-            android:layout_marginBottom="80dp"
-            android:contentDescription="@null"
-            app:elevation="6dp"
-            app:pressedTranslationZ="12dp"
-            app:srcCompat="@drawable/ic_position" />
-
-        <LinearLayout
-            android:id="@+id/search_linear"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#ddffffff"
-            android:visibility="gone"
-            android:layout_marginTop="?attr/actionBarSize">
-            <ListView
-                android:id="@+id/search_list_view"
-                android:layout_width="match_parent"
-                android:layout_margin="10dp"
-                android:layout_height="wrap_content">
-            </ListView>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/search_history_linear"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#ddffffff"
-            android:visibility="gone"
-            android:layout_marginTop="?attr/actionBarSize">
-            <ListView
-                android:id="@+id/search_history_list_view"
-                android:layout_width="match_parent"
-                android:layout_margin="10dp"
-                android:layout_height="wrap_content">
-            </ListView>
-        </LinearLayout>
-
-    </FrameLayout>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent">
+<include layout="@layout/main_map" android:layout_width="match_parent" android:layout_height="match_parent"/>
+<com.google.android.material.appbar.MaterialToolbar android:id="@+id/toolbar" android:layout_width="match_parent" android:layout_height="64dp" android:layout_margin="16dp" android:background="@drawable/panel_surface" android:elevation="4dp" app:title="@string/app_name" app:subtitle="@string/search_hint_short" app:titleTextColor="@color/text_main" app:subtitleTextColor="@color/text_muted" app:navigationIconTint="@color/colorPrimary" app:popupTheme="@style/AppTheme.PopupOverlay"/>
+<com.google.android.material.card.MaterialCardView android:id="@+id/location_card" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_gravity="bottom" android:layout_margin="16dp" app:cardCornerRadius="28dp" app:cardBackgroundColor="@color/surface" app:cardElevation="4dp" app:strokeColor="@color/outline_soft" app:strokeWidth="1dp">
+<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+<TextView android:id="@+id/location_status" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/location_idle" android:textColor="@color/colorPrimary" android:textStyle="bold" android:textSize="13sp"/>
+<com.google.android.material.button.MaterialButton android:id="@+id/panel_toggle" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="48dp" android:text="@string/panel_collapse" android:minWidth="48dp" android:insetTop="0dp" android:insetBottom="0dp"/>
+</LinearLayout>
+<LinearLayout android:id="@+id/location_details" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+<TextView android:id="@+id/location_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/location_choose" android:maxLines="2" android:ellipsize="end" android:textColor="@color/text_main" android:textSize="20sp" android:textStyle="bold"/>
+<TextView android:id="@+id/location_coordinates" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="@string/location_hint" android:textColor="@color/text_muted" android:textSize="13sp"/>
+</LinearLayout>
+<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:orientation="horizontal">
+<com.google.android.material.button.MaterialButton android:id="@+id/faBtnStart" android:layout_width="0dp" android:layout_weight="1" android:layout_height="56dp" android:text="@string/location_start" app:icon="@drawable/ic_position" app:iconGravity="textStart" app:cornerRadius="18dp"/>
+<com.google.android.material.button.MaterialButton android:id="@+id/location_stop" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="wrap_content" android:layout_height="56dp" android:layout_marginStart="10dp" android:text="@string/location_stop" android:visibility="gone" app:cornerRadius="18dp"/>
+</LinearLayout>
+</LinearLayout>
+</com.google.android.material.card.MaterialCardView>
+<LinearLayout android:id="@+id/search_linear" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="88dp" android:layout_marginHorizontal="16dp" android:background="@drawable/panel_surface" android:elevation="8dp" android:visibility="gone"><ListView android:id="@+id/search_list_view" android:layout_width="match_parent" android:layout_height="280dp" android:padding="8dp" android:divider="@color/outline_soft" android:dividerHeight="1dp"/></LinearLayout>
+<LinearLayout android:id="@+id/search_history_linear" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="88dp" android:layout_marginHorizontal="16dp" android:background="@drawable/panel_surface" android:elevation="8dp" android:visibility="gone"><ListView android:id="@+id/search_history_list_view" android:layout_width="match_parent" android:layout_height="280dp" android:padding="8dp" android:divider="@color/outline_soft" android:dividerHeight="1dp"/></LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

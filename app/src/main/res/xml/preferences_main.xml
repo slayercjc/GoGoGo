@@ -85,6 +85,10 @@
             app:iconSpaceReserved="false"/>
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="应用更新" app:iconSpaceReserved="false">
+        <SwitchPreferenceCompat app:key="update_auto_check" app:title="自动检查更新" app:summary="打开应用时检查，每天最多一次" app:defaultValue="true" app:iconSpaceReserved="false"/>
+        <SwitchPreferenceCompat app:key="update_wifi_download" app:title="仅 Wi-Fi 自动下载" app:summary="发现新版后在 Wi-Fi 下下载，安装由系统确认" app:defaultValue="false" app:dependency="update_auto_check" app:iconSpaceReserved="false"/>
+    </PreferenceCategory>
     <PreferenceCategory
         app:title="@string/setting_group_about"
         app:iconSpaceReserved="false">

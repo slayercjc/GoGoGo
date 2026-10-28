@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:background="@color/page_background"
     tools:openDrawer="start">
 
     <include
@@ -18,7 +19,11 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:background="@color/surface"
+        app:itemIconTint="@color/colorPrimary"
+        app:itemTextColor="@color/text_main"
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/menu_nav" />
 
 </androidx.drawerlayout.widget.DrawerLayout>
+
