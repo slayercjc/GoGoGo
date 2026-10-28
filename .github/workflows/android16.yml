@@ -82,16 +82,16 @@ jobs:
           fi
           tools="$ANDROID_HOME/build-tools/35.0.0"
           "$tools/zipalign" -P 16 -f 4 "${apks[0]}" "$RUNNER_TEMP/aligned.apk"
-          "$tools/apksigner" sign --ks "$keyfile" --ks-key-alias "$ANDROID_KEY_ALIAS" --ks-pass env:ANDROID_STORE_PASSWORD --key-pass env:ANDROID_KEY_PASSWORD --out dist/GoGoGo-android16-candidate.apk "$RUNNER_TEMP/aligned.apk"
-          "$tools/apksigner" verify --verbose --print-certs dist/GoGoGo-android16-candidate.apk > dist/signature-report.txt
-          "$tools/zipalign" -c -P 16 -v 4 dist/GoGoGo-android16-candidate.apk > dist/zip-alignment.txt
+          "$tools/apksigner" sign --ks "$keyfile" --ks-key-alias "$ANDROID_KEY_ALIAS" --ks-pass env:ANDROID_STORE_PASSWORD --key-pass env:ANDROID_KEY_PASSWORD --out dist/HuanWei-1.0.apk "$RUNNER_TEMP/aligned.apk"
+          "$tools/apksigner" verify --verbose --print-certs dist/HuanWei-1.0.apk > dist/signature-report.txt
+          "$tools/zipalign" -c -P 16 -v 4 dist/HuanWei-1.0.apk > dist/zip-alignment.txt
           grep -i 'certificate SHA-1 digest: cd6a44cd781be47f1490675e24e82759c900595b' dist/signature-report.txt
-          sha256sum dist/GoGoGo-android16-candidate.apk > dist/SHA256SUMS.txt
+          sha256sum dist/HuanWei-1.0.apk > dist/SHA256SUMS.txt
       - name: Upload signed APK
         if: inputs.mode == 'signed-apk' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[signed-apk]'))
         uses: actions/upload-artifact@v4
         with:
-          name: GoGoGo-Android16-signed
+          name: HuanWei-1.0-signed
           path: dist/
           if-no-files-found: error
           retention-days: 14

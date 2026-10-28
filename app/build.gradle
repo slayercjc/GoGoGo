@@ -9,8 +9,8 @@ android {
         minSdkVersion 27
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 36
-        versionCode 1121
-        versionName '1.12.2-android16-candidate' // https://semver.org/lang/zh-CN/
+        versionCode 1122
+        versionName '1.0' // https://semver.org/lang/zh-CN/
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         resConfigs 'zh', 'zh-rCN', 'en', 'en-rUS'
         ndk {
@@ -70,9 +70,9 @@ android {
             if (outputFile != null && outputFile.name.endsWith('.apk')) {
                 def fileName
                 if (variant.buildType.name == 'release') {
-                    fileName = "Go_${defaultConfig.versionName}_arm64-v8a_release.apk"
+                    fileName = "HuanWei_${defaultConfig.versionName}_arm64-v8a_release.apk"
                 } else {
-                    fileName = "Go_${defaultConfig.versionName}_arm64-v8a_debug.apk"
+                    fileName = "HuanWei_${defaultConfig.versionName}_arm64-v8a_debug.apk"
                 }
                 outputFileName=fileName
             }

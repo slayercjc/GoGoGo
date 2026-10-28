@@ -1,11 +1,11 @@
 <resources>
-    <string name="app_name">影梭</string>
+    <string name="app_name">幻位</string>
     <string name="app_settings">设置</string>
     <string name="app_history">历史记录</string>
-    <string name="app_author">ZCShou</string>
+    <string name="app_author">Slayercjc</string>
     <string name="app_email">zcsexp@gmail.com</string>
     <string name="app_statement">仅供学习使用，否则后果自负！</string>
-    <string name="app_service_tips">影梭服务正在运行中</string>
+    <string name="app_service_tips">幻位服务正在运行中</string>
     <string name="app_agreement">用户协议</string>
     <string name="app_agreement_content">"1. 本软件专为学习 Android 开发使用，不会收集任何用户数据。"
     "严禁利用本软件侵犯他人隐私权或者用于游戏牟利，如软件使用者不能遵守此规定， 请立即删除。"
@@ -107,7 +107,7 @@
     <string name="nav_menu_upgrade">检测更新</string>
     <string name="nav_menu_feedback">问题反馈</string>
     <string name="nav_menu_contact">联系作者</string>
-    <string name="nav_user_name">影梭</string>
+    <string name="nav_user_name">幻位</string>
     <string name="nav_user_limit_info">仅供学习使用，否则后果自负!</string>
 
     <!-- 主界面 -->
@@ -129,7 +129,7 @@
     <!-- 更新 -->
     <string name="update_title">新版本可用</string>
     <string name="update_downloading">升级文件下载中。。。</string>
-    <string name="update_last">恭喜，影梭已是最新版</string>
+    <string name="update_last">恭喜，幻位已是最新版</string>
     <string name="update_download">立即下载</string>
     <string name="update_ignore">忽略一次</string>
     <string name="update_time">更新时间：</string>

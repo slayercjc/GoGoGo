@@ -438,7 +438,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                 File file = new File(getExternalFilesDir("Logs"), GoApplication.LOG_FILE_NAME);
                 ShareUtils.shareFile(this, file, item.getTitle().toString());
             } else if (id == R.id.nav_contact) {
-                Uri uri = Uri.parse("https://gitee.com/itexp/gogogo/issues");
+                Uri uri = Uri.parse("https://github.com/slayercjc");
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
             }
@@ -456,7 +456,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         ((TextView) header.findViewById(R.id.user_name)).setText(R.string.app_name);
         header.findViewById(R.id.user_icon).setOnClickListener(v ->
                 startActivity(new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("https://github.com/ZCShou/GoGoGo"))));
+                        Uri.parse("https://github.com/slayercjc/GoGoGo"))));
     }
 
     /*============================== 主界面地图 相关 ==============================*/
@@ -1205,7 +1205,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
     private void checkUpdateVersion(boolean result) {
         startActivity(new Intent(Intent.ACTION_VIEW,
-                Uri.parse("https://github.com/ZCShou/GoGoGo/releases")));
+                Uri.parse("https://github.com/slayercjc/GoGoGo/releases")));
     }
 
     private void downloadNewVersion(String url) {
