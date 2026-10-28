@@ -4,7 +4,7 @@
 <RadioButton android:id="@+id/mapNormal" android:layout_width="wrap_content" android:layout_height="48dp" android:checked="true" android:text="@string/map_pic_normal" android:textColor="@color/text_main"/>
 <RadioButton android:id="@+id/mapSatellite" android:layout_width="wrap_content" android:layout_height="48dp" android:layout_marginStart="8dp" android:text="@string/map_pic_sate" android:textColor="@color/text_main"/>
 </RadioGroup>
-<LinearLayout android:layout_width="48dp" android:layout_height="wrap_content" android:layout_gravity="end|center_vertical" android:layout_marginEnd="16dp" android:orientation="vertical" android:background="@drawable/panel_surface" android:elevation="2dp">
+<LinearLayout android:layout_width="wrap_content" android:layout_height="48dp" android:layout_gravity="end|bottom" android:layout_marginEnd="16dp" android:layout_marginBottom="12dp" android:orientation="horizontal" android:background="@drawable/panel_surface" android:elevation="2dp">
 <ImageButton android:id="@+id/cur_position" style="@style/HuanWei.MapButton" android:contentDescription="@string/cur_position" app:srcCompat="@drawable/ic_home_position" app:tint="@color/colorPrimary"/>
 <ImageButton android:id="@+id/input_pos" style="@style/HuanWei.MapButton" android:contentDescription="@string/input_button" app:srcCompat="@drawable/ic_input" app:tint="@color/colorPrimary"/>
 <ImageButton android:id="@+id/zoom_in" style="@style/HuanWei.MapButton" android:contentDescription="@string/zoom_in" app:srcCompat="@drawable/ic_zoom_in" app:tint="@color/colorPrimary"/>
