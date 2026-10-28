@@ -1,0 +1,102 @@
+name: Android 16 build
+
+on:
+  push:
+    branches:
+      - android16-baidu
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "check = compile only; signed-apk = build an installable APK"
+        required: true
+        default: check
+        type: choice
+        options:
+          - check
+          - signed-apk
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK
+        run: sdkmanager "platforms;android-36" "build-tools;35.0.0"
+      - name: Validate signing inputs
+        if: inputs.mode == 'signed-apk'
+        shell: bash
+        env:
+          BAIDU_MAP_AK: ${{ secrets.BAIDU_MAP_AK }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for name in BAIDU_MAP_AK ANDROID_KEYSTORE_BASE64 ANDROID_STORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing repository secret: $name"
+              exit 1
+            fi
+          done
+      - name: Compile, unit tests and lint
+        env:
+          BAIDU_MAP_AK: ${{ secrets.BAIDU_MAP_AK }}
+        run: bash ./gradlew --no-daemon :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
+      - name: Build release
+        if: inputs.mode == 'signed-apk'
+        env:
+          BAIDU_MAP_AK: ${{ secrets.BAIDU_MAP_AK }}
+        run: bash ./gradlew --no-daemon :app:assembleRelease
+      - name: Sign and verify APK
+        if: inputs.mode == 'signed-apk'
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          umask 077
+          keyfile="$RUNNER_TEMP/gogogo-signing.jks"
+          trap 'rm -f "$keyfile"' EXIT
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keyfile"
+          mkdir -p dist
+          shopt -s nullglob
+          apks=(app/build/outputs/apk/release/*.apk)
+          if [ "${#apks[@]}" -ne 1 ]; then
+            echo "::error::Expected exactly one release APK"
+            exit 1
+          fi
+          tools="$ANDROID_HOME/build-tools/35.0.0"
+          "$tools/zipalign" -P 16 -f 4 "${apks[0]}" "$RUNNER_TEMP/aligned.apk"
+          "$tools/apksigner" sign --ks "$keyfile" --ks-key-alias "$ANDROID_KEY_ALIAS" --ks-pass env:ANDROID_STORE_PASSWORD --key-pass env:ANDROID_KEY_PASSWORD --out dist/GoGoGo-android16-candidate.apk "$RUNNER_TEMP/aligned.apk"
+          "$tools/apksigner" verify --verbose --print-certs dist/GoGoGo-android16-candidate.apk > dist/signature-report.txt
+          "$tools/zipalign" -c -P 16 -v 4 dist/GoGoGo-android16-candidate.apk > dist/zip-alignment.txt
+          sha256sum dist/GoGoGo-android16-candidate.apk > dist/SHA256SUMS.txt
+      - name: Upload signed APK
+        if: inputs.mode == 'signed-apk'
+        uses: actions/upload-artifact@v4
+        with:
+          name: GoGoGo-Android16-signed
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload validation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-reports
+          path: app/build/reports/
+          if-no-files-found: ignore
+          retention-days: 14

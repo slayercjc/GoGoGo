@@ -128,8 +128,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
     /*============================== NavigationView 相关 ==============================*/
     private NavigationView mNavigationView;
-    private CheckBox mPtlCheckBox;
-    private final JSONObject mReg = new JSONObject();
     /*============================== 主界面地图 相关 ==============================*/
     /************** 地图 *****************/
     public final static BitmapDescriptor mMapIndicator = BitmapDescriptorFactory.fromResource(R.drawable.icon_gcoding);
@@ -176,6 +174,10 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ((GoApplication) getApplication()).initializeBaidu();
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override public void handleOnBackPressed() { moveTaskToBack(false); }
+        });
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -210,7 +212,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
-
+                mServiceBinder = null;
             }
         };
 
@@ -220,7 +222,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
         initUpdateVersion();
 
-        checkUpdateVersion(false);
+        // Custom builds are updated manually; upstream APKs use a different signature.
     }
 
     @Override
@@ -277,10 +279,6 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         super.onDestroy();
     }
 
-    @Override
-    public void onBackPressed() {
-        moveTaskToBack(false);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
@@ -454,154 +452,11 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     }
 
     private void initUserInfo() {
-        View navHeaderView = mNavigationView.getHeaderView(0);
-
-        TextView mUserName = navHeaderView.findViewById(R.id.user_name);
-//        TextView mUserLimitInfo = navHeaderView.findViewById(R.id.user_limit);
-        ImageView mUserIcon = navHeaderView.findViewById(R.id.user_icon);
-
-        if (sharedPreferences.getString("setting_reg_code", null) != null) {
-            mUserName.setText(getResources().getString(R.string.app_author));
-        } else {
-            mUserIcon.setOnClickListener(v -> {
-                DrawerLayout drawer = findViewById(R.id.drawer_layout);
-
-                if (drawer.isDrawerOpen(GravityCompat.START)) {
-                    drawer.closeDrawer(GravityCompat.START);
-                }
-                Uri uri = Uri.parse("https://gitee.com/itexp/gogogo");
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
-            });
-
-            mUserName.setOnClickListener(v -> {
-                DrawerLayout drawer = findViewById(R.id.drawer_layout);
-
-                if (drawer.isDrawerOpen(GravityCompat.START)) {
-                    drawer.closeDrawer(GravityCompat.START);
-                }
-                showRegisterDialog();
-            });
-        }
-    }
-
-    public void showRegisterDialog() {
-        final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(this).create();
-        alertDialog.show();
-        alertDialog.setCancelable(false);
-        Window window = alertDialog.getWindow();
-        if (window != null) {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-            window.setContentView(R.layout.register);
-            window.setGravity(Gravity.CENTER);
-            window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
-
-            final TextView mRegReq = window.findViewById(R.id.reg_request);
-            final TextView regResp = window.findViewById(R.id.reg_response);
-
-            final TextView regUserName = window.findViewById(R.id.reg_user_name);
-            regUserName.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    if (s.length() >= 3) {
-                        try {
-                            mReg.put("UserName", s.toString());
-                            mRegReq.setText(mReg.toString());
-                        } catch (JSONException e) {
-                            XLog.e("ERROR: username");
-                        }
-                    }
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-
-                }
-            });
-
-            DatePicker mDatePicker = window.findViewById(R.id.date_picker);
-            mDatePicker.setOnDateChangedListener((view, year, monthOfYear, dayOfMonth) -> {
-                try {
-                    mReg.put("DateTime", 1111);
-                    mRegReq.setText(mReg.toString());
-                } catch (JSONException e) {
-                    XLog.e("ERROR: DateTime");
-                }
-            });
-
-            mPtlCheckBox = window.findViewById(R.id.reg_check);
-            mPtlCheckBox.setOnClickListener(v -> {
-                if (mPtlCheckBox.isChecked()) {
-                    showProtocolDialog();
-                }
-            });
-
-            TextView regCancel = window.findViewById(R.id.reg_cancel);
-            regCancel.setOnClickListener(v -> alertDialog.cancel());
-
-            TextView regAgree = window.findViewById(R.id.reg_agree);
-            regAgree.setOnClickListener(v -> {
-                if (!mPtlCheckBox.isChecked()) {
-                    GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_protocol));
-                    return;
-                }
-                if (TextUtils.isEmpty(regUserName.getText())) {
-                    GoUtils.DisplayToast(this,  getResources().getString(R.string.app_error_username));
-                    return;
-                }
-                if (TextUtils.isEmpty(regResp.getText())) {
-                    GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_code));
-                    return;
-                }
-                try {
-                    mReg.put("RegReq", mReg.toString());
-                    mReg.put("ReqResp", regResp.toString());
-
-                } catch (JSONException e) {
-                    XLog.e("ERROR: reg req");
-                }
-
-                alertDialog.cancel();
-            });
-        }
-    }
-
-    private void showProtocolDialog() {
-        final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(this).create();
-        alertDialog.show();
-        alertDialog.setCancelable(false);
-        Window window = alertDialog.getWindow();
-        if (window != null) {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);      // 防止出现闪屏
-            window.setContentView(R.layout.user_agreement);
-            window.setGravity(Gravity.CENTER);
-            window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
-
-            TextView tvContent = window.findViewById(R.id.tv_content);
-            Button tvCancel = window.findViewById(R.id.tv_cancel);
-            Button tvAgree = window.findViewById(R.id.tv_agree);
-            SpannableStringBuilder ssb = new SpannableStringBuilder();
-            ssb.append(getResources().getString(R.string.app_agreement));
-
-            tvContent.setMovementMethod(LinkMovementMethod.getInstance());
-            tvContent.setText(ssb, TextView.BufferType.SPANNABLE);
-
-            tvCancel.setOnClickListener(v -> {
-                mPtlCheckBox.setChecked(false);
-                alertDialog.cancel();
-            });
-
-            tvAgree.setOnClickListener(v -> {
-                mPtlCheckBox.setChecked(true);
-                alertDialog.cancel();
-            });
-        }
+        View header = mNavigationView.getHeaderView(0);
+        ((TextView) header.findViewById(R.id.user_name)).setText(R.string.app_name);
+        header.findViewById(R.id.user_icon).setOnClickListener(v ->
+                startActivity(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://github.com/ZCShou/GoGoGo"))));
     }
 
     /*============================== 主界面地图 相关 ==============================*/
@@ -1013,23 +868,34 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         mButtonStart.setOnClickListener(this::doGoLocation);
     }
 
-    private void startGoLocation() {
+    private boolean startGoLocation() {
         Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
-        bindService(serviceGoIntent, mConnection, BIND_AUTO_CREATE);    // 绑定服务和活动，之后活动就可以去调服务的方法了
         double[] latLng = MapUtils.bd2wgs(mMarkLatLngMap.longitude, mMarkLatLngMap.latitude);
         serviceGoIntent.putExtra(LNG_MSG_ID, latLng[0]);
         serviceGoIntent.putExtra(LAT_MSG_ID, latLng[1]);
         double alt = Double.parseDouble(sharedPreferences.getString("setting_altitude", "55.0"));
         serviceGoIntent.putExtra(ALT_MSG_ID, alt);
 
-        startForegroundService(serviceGoIntent);
+        try {
+            startForegroundService(serviceGoIntent);
+            if (!bindService(serviceGoIntent, mConnection, BIND_AUTO_CREATE)) {
+                stopService(serviceGoIntent);
+                return false;
+            }
+        } catch (RuntimeException e) {
+            stopService(serviceGoIntent);
+            GoUtils.DisplayToast(this, "无法启动定位服务，请检查定位权限并从前台重新启动");
+            XLog.e(e);
+            return false;
+        }
         XLog.d("startForegroundService: ServiceGo");
 
         isMockServStart = true;
+        return true;
     }
 
     private void stopGoLocation() {
-        unbindService(mConnection); // 解绑服务，服务要记得解绑，不要造成内存泄漏
+        if (isMockServStart) unbindService(mConnection); // 解绑服务，服务要记得解绑，不要造成内存泄漏
         Intent serviceGoIntent = new Intent(MainActivity.this, ServiceGo.class);
         stopService(serviceGoIntent);
         isMockServStart = false;
@@ -1061,6 +927,10 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             } else {
                 double[] latLng = MapUtils.bd2wgs(mMarkLatLngMap.longitude, mMarkLatLngMap.latitude);
                 double alt = Double.parseDouble(sharedPreferences.getString("setting_altitude", "55.0"));
+                if (mServiceBinder == null) {
+                    GoUtils.DisplayToast(this, "定位服务尚未连接，请稍后重试");
+                    return;
+                }
                 mServiceBinder.setPosition(latLng[0], latLng[1], alt);
                 Snackbar.make(v, "已传送到新位置", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
@@ -1083,9 +953,9 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
                     Snackbar.make(v, "请先点击地图位置或者搜索位置", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 } else {
-                    startGoLocation();
+                    if (!startGoLocation()) return;
                     mButtonStart.setImageResource(R.drawable.ic_fly);
-                    Snackbar.make(v, "模拟位置已启动", Snackbar.LENGTH_LONG)
+                    Snackbar.make(v, "正在启动模拟位置", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
 
                     recordCurrentLocation(mMarkLatLngMap.longitude, mMarkLatLngMap.latitude);
@@ -1143,80 +1013,15 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
     // 记录请求的位置信息
     private void recordCurrentLocation(double lng, double lat) {
-        //参数坐标系：bd09
-        final String safeCode = getResources().getString(R.string.safecode);
-        final String ak = getResources().getString(R.string.ak);
         double[] latLng = MapUtils.bd2wgs(lng, lat);
-        //bd09坐标的位置信息
-        String mapApiUrl = "https://api.map.baidu.com/reverse_geocoding/v3/?ak=" + ak + "&output=json&coordtype=bd09ll" + "&location=" + lat + "," + lng + "&mcode=" + safeCode;
-
-        okhttp3.Request request = new okhttp3.Request.Builder().url(mapApiUrl).get().build();
-        final Call call = mOkHttpClient.newCall(request);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                //http 请求失败
-                XLog.e("HTTP: HTTP GET FAILED");
-                //插表参数
-                ContentValues contentValues = new ContentValues();
-                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, mMarkName);
-                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
-                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(latLng[1]));
-                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
-                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(lng));
-                contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(lat));
-
-                DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                ResponseBody responseBody = response.body();
-                if (responseBody != null) {
-                    String resp = responseBody.string();
-                    try {
-                        JSONObject getRetJson = new JSONObject(resp);
-
-                        //位置获取成功
-                        if (Integer.parseInt(getRetJson.getString("status")) == 0) {
-                            JSONObject posInfoJson = getRetJson.getJSONObject("result");
-                            String formatted_address = posInfoJson.getString("formatted_address");
-                            //插表参数
-                            ContentValues contentValues = new ContentValues();
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, formatted_address);
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(latLng[1]));
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(lng));
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(lat));
-                            DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
-                        } else {
-                            ContentValues contentValues = new ContentValues();
-                            // contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, getResources().getString(R.string.history_location_default_name));
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, mMarkName);
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(latLng[1]));
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(lng));
-                            contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(lat));
-                            DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
-                        }
-                    } catch (JSONException e) {
-                        XLog.e("JSON: resolve json error");
-                        //插表参数
-                        ContentValues contentValues = new ContentValues();
-                        // contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, getResources().getString(R.string.history_location_default_name));
-                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, mMarkName);
-                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
-                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(latLng[1]));
-                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
-                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(lng));
-                        contentValues.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(lat));
-                        DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, contentValues);
-                    }
-                }
-            }
-        });
+        ContentValues values = new ContentValues();
+        values.put(DataBaseHistoryLocation.DB_COLUMN_LOCATION, mMarkName);
+        values.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_WGS84, String.valueOf(latLng[0]));
+        values.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_WGS84, String.valueOf(latLng[1]));
+        values.put(DataBaseHistoryLocation.DB_COLUMN_TIMESTAMP, System.currentTimeMillis() / 1000);
+        values.put(DataBaseHistoryLocation.DB_COLUMN_LONGITUDE_CUSTOM, Double.toString(lng));
+        values.put(DataBaseHistoryLocation.DB_COLUMN_LATITUDE_CUSTOM, Double.toString(lat));
+        DataBaseHistoryLocation.saveHistoryLocation(mLocationHistoryDB, values);
     }
 
     /*============================== SearchView 相关 ==============================*/
@@ -1389,86 +1194,18 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         mDownloadBdRcv = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                installNewVersion();
+                if (intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1) == mDownloadId
+                        && mDownloadId > 0) installNewVersion();
             }
         };
-        registerReceiver(mDownloadBdRcv, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        androidx.core.content.ContextCompat.registerReceiver(this, mDownloadBdRcv,
+                new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+                androidx.core.content.ContextCompat.RECEIVER_EXPORTED);
     }
 
     private void checkUpdateVersion(boolean result) {
-        String mapApiUrl = "https://api.github.com/repos/zcshou/gogogo/releases/latest";
-
-        okhttp3.Request request = new okhttp3.Request.Builder().url(mapApiUrl).get().build();
-        final Call call = mOkHttpClient.newCall(request);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                XLog.i("更新检测失败");
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull okhttp3.Response response) throws IOException {
-                ResponseBody responseBody = response.body();
-                if (responseBody != null) {
-                    String resp = responseBody.string();
-                    // 注意，该请求在子线程，不能直接操作界面
-                    runOnUiThread(() -> {
-                        try {
-                            JSONObject getRetJson = new JSONObject(resp);
-                            String curVersion = GoUtils.getVersionName(MainActivity.this);
-
-                            if (curVersion != null
-                                    && (!getRetJson.getString("name").contains(curVersion)
-                                    || !getRetJson.getString("tag_name").contains(curVersion))) {
-                                final android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(MainActivity.this).create();
-                                alertDialog.show();
-                                alertDialog.setCancelable(false);
-                                Window window = alertDialog.getWindow();
-                                if (window != null) {
-                                    window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);      // 防止出现闪屏
-                                    window.setContentView(R.layout.update);
-                                    window.setGravity(Gravity.CENTER);
-                                    window.setWindowAnimations(R.style.DialogAnimFadeInFadeOut);
-
-                                    TextView updateTitle = window.findViewById(R.id.update_title);
-                                    updateTitle.setText(getRetJson.getString("name"));
-                                    TextView updateTime = window.findViewById(R.id.update_time);
-                                    updateTime.setText(getRetJson.getString("created_at"));
-                                    TextView updateCommit = window.findViewById(R.id.update_commit);
-                                    updateCommit.setText(getRetJson.getString("target_commitish"));
-
-                                    TextView updateContent = window.findViewById(R.id.update_content);
-                                    final Markwon markwon = Markwon.create(MainActivity.this);
-                                    markwon.setMarkdown(updateContent, getRetJson.getString("body"));
-
-                                    Button updateCancel = window.findViewById(R.id.update_ignore);
-                                    updateCancel.setOnClickListener(v -> alertDialog.cancel());
-
-                                    /* 这里用来保存下载地址 */
-                                    JSONArray jsonArray = new JSONArray(getRetJson.getString("assets"));
-                                    JSONObject jsonObject = jsonArray.getJSONObject(0);
-                                    String download_url = jsonObject.getString("browser_download_url");
-                                    mUpdateFilename = jsonObject.getString("name");
-
-                                    Button updateAgree = window.findViewById(R.id.update_agree);
-                                    updateAgree.setOnClickListener(v -> {
-                                        alertDialog.cancel();
-                                        GoUtils.DisplayToast(MainActivity.this, getResources().getString(R.string.update_downloading));
-                                        downloadNewVersion(download_url);
-                                    });
-                                }
-                            } else {
-                                if (result) {
-                                    GoUtils.DisplayToast(MainActivity.this, getResources().getString(R.string.update_last));
-                                }
-                            }
-                        } catch (JSONException e) {
-                            XLog.e("ERROR: resolve json");
-                        }
-                    });
-                }
-            }
-        });
+        startActivity(new Intent(Intent.ACTION_VIEW,
+                Uri.parse("https://github.com/ZCShou/GoGoGo/releases")));
     }
 
     private void downloadNewVersion(String url) {

@@ -30,6 +30,46 @@ public class GoApplication extends Application {
 
         initXlog();
 
+        if (getSharedPreferences("KEY_ACCEPT_AGREEMENT", MODE_PRIVATE)
+                .getBoolean("KEY_ACCEPT_PRIVACY", false)) {
+            initializeBaidu();
+        }
+    }
+
+    private boolean baiduInitialized;
+    private android.content.BroadcastReceiver baiduStatusReceiver;
+
+    public synchronized void initializeBaidu() {
+        if (baiduInitialized) return;
+        // Register before initialize(): authentication completes asynchronously.
+        if (baiduStatusReceiver == null) {
+            baiduStatusReceiver = new android.content.BroadcastReceiver() {
+                @Override
+                public void onReceive(android.content.Context context, android.content.Intent intent) {
+                    String action = intent.getAction();
+                    if (SDKInitializer.SDK_BROADTCAST_ACTION_STRING_PERMISSION_CHECK_ERROR.equals(action)) {
+                        int code = intent.getIntExtra(
+                                SDKInitializer.SDK_BROADTCAST_INTENT_EXTRA_INFO_KEY_ERROR_CODE, -1);
+                        XLog.e("Baidu authentication failed, code=" + code);
+                        android.widget.Toast.makeText(context,
+                                "百度地图鉴权失败（" + code + "），请核对 AK、包名和安装包签名 SHA1",
+                                android.widget.Toast.LENGTH_LONG).show();
+                    } else if (SDKInitializer.SDK_BROADCAST_ACTION_STRING_NETWORK_ERROR.equals(action)) {
+                        XLog.e("Baidu map network error");
+                        android.widget.Toast.makeText(context, "百度地图网络连接失败，请检查联网权限",
+                                android.widget.Toast.LENGTH_LONG).show();
+                    } else {
+                        XLog.i("Baidu authentication succeeded");
+                    }
+                }
+            };
+            android.content.IntentFilter filter = new android.content.IntentFilter();
+            filter.addAction(SDKInitializer.SDK_BROADTCAST_ACTION_STRING_PERMISSION_CHECK_ERROR);
+            filter.addAction(SDKInitializer.SDK_BROADTCAST_ACTION_STRING_PERMISSION_CHECK_OK);
+            filter.addAction(SDKInitializer.SDK_BROADCAST_ACTION_STRING_NETWORK_ERROR);
+            androidx.core.content.ContextCompat.registerReceiver(this, baiduStatusReceiver, filter,
+                    androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED);
+        }
         // 百度地图 7.5 开始，要求必须同意隐私政策，默认为false
         SDKInitializer.setAgreePrivacy(this, true);
         // 百度定位 7.5 开始，要求必须同意隐私政策，默认为false(官方说可以统一为以上接口，但实际测试并不行，定位还是需要单独设置)
@@ -39,8 +79,11 @@ public class GoApplication extends Application {
             // 在使用 SDK 各组间之前初始化 context 信息，传入 ApplicationContext
             SDKInitializer.initialize(this);
             SDKInitializer.setCoordType(CoordType.BD09LL);
+            baiduInitialized = true;
         } catch (BaiduMapSDKException e) {
-            XLog.e("ERROR init baidu sdk");
+            XLog.e("Baidu SDK initialization failed: " + e.getClass().getSimpleName());
+            android.widget.Toast.makeText(this, "百度地图初始化失败，请检查 SDK 与 AK 配置",
+                    android.widget.Toast.LENGTH_LONG).show();
         }
     }
 

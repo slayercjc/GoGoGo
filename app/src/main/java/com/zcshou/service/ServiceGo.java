@@ -38,17 +38,18 @@ public class ServiceGo extends Service {
     public static final double DEFAULT_LNG = 117.027707;
     public static final double DEFAULT_ALT = 55.0D;
     public static final float DEFAULT_BEA = 0.0F;
-    private double mCurLat = DEFAULT_LAT;
-    private double mCurLng = DEFAULT_LNG;
-    private double mCurAlt = DEFAULT_ALT;
-    private float mCurBea = DEFAULT_BEA;
-    private double mSpeed = 1.2;        /* 默认的速度，单位 m/s */
+    private volatile double mCurLat = DEFAULT_LAT;
+    private volatile double mCurLng = DEFAULT_LNG;
+    private volatile double mCurAlt = DEFAULT_ALT;
+    private volatile float mCurBea = DEFAULT_BEA;
+    private volatile double mSpeed = 1.2;        /* 默认的速度，单位 m/s */
     private static final int HANDLER_MSG_ID = 0;
     private static final String SERVICE_GO_HANDLER_NAME = "ServiceGoLocation";
     private LocationManager mLocManager;
     private HandlerThread mLocHandlerThread;
     private Handler mLocHandler;
-    private boolean isStop = false;
+    private volatile boolean isStop = false;
+    private volatile boolean initialized;
     // 通知栏消息
     private static final int SERVICE_GO_NOTE_ID = 1;
     private static final String SERVICE_GO_NOTE_ACTION_JOYSTICK_SHOW = "ShowJoyStick";
@@ -72,44 +73,61 @@ public class ServiceGo extends Service {
 
         mLocManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
-        removeTestProviderNetwork();
-        addTestProviderNetwork();
-
-        removeTestProviderGPS();
-        addTestProviderGPS();
-
-        initGoLocation();
-
         initNotification();
-
-        initJoyStick();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent == null || !intent.hasExtra(MainActivity.LNG_MSG_ID)
+                || !intent.hasExtra(MainActivity.LAT_MSG_ID)) {
+            stopSelf();
+            return START_NOT_STICKY;
+        }
         mCurLng = intent.getDoubleExtra(MainActivity.LNG_MSG_ID, DEFAULT_LNG);
         mCurLat = intent.getDoubleExtra(MainActivity.LAT_MSG_ID, DEFAULT_LAT);
         mCurAlt = intent.getDoubleExtra(MainActivity.ALT_MSG_ID, DEFAULT_ALT);
-
-        mJoyStick.setCurrentPosition(mCurLng, mCurLat, mCurAlt);
-
-        return super.onStartCommand(intent, flags, startId);
+        if (!Double.isFinite(mCurLng) || !Double.isFinite(mCurLat)
+                || !Double.isFinite(mCurAlt) || Math.abs(mCurLat) > 90 || Math.abs(mCurLng) > 180) {
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+        if (!initialized) {
+            try {
+                addTestProviderNetwork();
+                addTestProviderGPS();
+                initJoyStick();
+                mJoyStick.setCurrentPosition(mCurLng, mCurLat, mCurAlt);
+                initGoLocation();
+                initialized = true;
+            } catch (RuntimeException e) {
+                XLog.e("Unable to start mock location: " + e);
+                android.widget.Toast.makeText(this, "无法启动模拟定位，请检查定位、悬浮窗和模拟位置应用设置",
+                        android.widget.Toast.LENGTH_LONG).show();
+                stopSelf();
+            }
+        } else {
+            mJoyStick.setCurrentPosition(mCurLng, mCurLat, mCurAlt);
+        }
+        return START_NOT_STICKY;
     }
 
     @Override
     public void onDestroy() {
         isStop = true;
-        mLocHandler.removeMessages(HANDLER_MSG_ID);
-        mLocHandlerThread.quit();
-
-        mJoyStick.destroy();
-
+        if (mLocHandler != null) mLocHandler.removeCallbacksAndMessages(null);
+        if (mLocHandlerThread != null) {
+            mLocHandlerThread.quitSafely();
+            try {
+                mLocHandlerThread.join(500);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        if (mJoyStick != null) mJoyStick.destroy();
         removeTestProviderNetwork();
         removeTestProviderGPS();
-
-        unregisterReceiver(mActReceiver);
+        if (mActReceiver != null) unregisterReceiver(mActReceiver);
         stopForeground(STOP_FOREGROUND_REMOVE);
-
         super.onDestroy();
     }
 
@@ -118,7 +136,8 @@ public class ServiceGo extends Service {
         IntentFilter filter = new IntentFilter();
         filter.addAction(SERVICE_GO_NOTE_ACTION_JOYSTICK_SHOW);
         filter.addAction(SERVICE_GO_NOTE_ACTION_JOYSTICK_HIDE);
-        registerReceiver(mActReceiver, filter);
+        androidx.core.content.ContextCompat.registerReceiver(this, mActReceiver, filter,
+                androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED);
 
         NotificationChannel mChannel = new NotificationChannel(SERVICE_GO_NOTE_CHANNEL_ID, SERVICE_GO_NOTE_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -130,9 +149,9 @@ public class ServiceGo extends Service {
         //准备intent
         Intent clickIntent = new Intent(this, MainActivity.class);
         PendingIntent clickPI = PendingIntent.getActivity(this, 1, clickIntent, PendingIntent.FLAG_IMMUTABLE);
-        Intent showIntent = new Intent(SERVICE_GO_NOTE_ACTION_JOYSTICK_SHOW);
+        Intent showIntent = new Intent(SERVICE_GO_NOTE_ACTION_JOYSTICK_SHOW).setPackage(getPackageName());
         PendingIntent showPendingPI = PendingIntent.getBroadcast(this, 0, showIntent, PendingIntent.FLAG_IMMUTABLE);
-        Intent hideIntent = new Intent(SERVICE_GO_NOTE_ACTION_JOYSTICK_HIDE);
+        Intent hideIntent = new Intent(SERVICE_GO_NOTE_ACTION_JOYSTICK_HIDE).setPackage(getPackageName());
         PendingIntent hidePendingPI = PendingIntent.getBroadcast(this, 0, hideIntent, PendingIntent.FLAG_IMMUTABLE);
 
         Notification notification = new NotificationCompat.Builder(this, SERVICE_GO_NOTE_CHANNEL_ID)
@@ -145,7 +164,12 @@ public class ServiceGo extends Service {
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .build();
 
-        startForeground(SERVICE_GO_NOTE_ID, notification);
+        if (Build.VERSION.SDK_INT >= 29) {
+            startForeground(SERVICE_GO_NOTE_ID, notification,
+                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION);
+        } else {
+            startForeground(SERVICE_GO_NOTE_ID, notification);
+        }
     }
 
     private void initJoyStick() {
@@ -229,7 +253,7 @@ public class ServiceGo extends Service {
                 mLocManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true);
             }
         } catch (Exception e) {
-            XLog.e("SERVICEGO: ERROR - addTestProviderGPS");
+            throw new IllegalStateException("Cannot add mock GPS provider", e);
         }
     }
 
@@ -251,7 +275,9 @@ public class ServiceGo extends Service {
 
             mLocManager.setTestProviderLocation(LocationManager.GPS_PROVIDER, loc);
         } catch (Exception e) {
-            XLog.e("SERVICEGO: ERROR - setLocationGPS");
+            isStop = true;
+            stopSelf();
+            XLog.e("Mock location stopped: " + e);
         }
     }
 
@@ -284,7 +310,7 @@ public class ServiceGo extends Service {
                 mLocManager.setTestProviderEnabled(LocationManager.NETWORK_PROVIDER, true);
             }
         } catch (SecurityException e) {
-            XLog.e("SERVICEGO: ERROR - addTestProviderNetwork");
+            throw new IllegalStateException("Cannot add mock network provider", e);
         }
     }
 
@@ -303,7 +329,9 @@ public class ServiceGo extends Service {
 
             mLocManager.setTestProviderLocation(LocationManager.NETWORK_PROVIDER, loc);
         } catch (Exception e) {
-            XLog.e("SERVICEGO: ERROR - setLocationNetwork");
+            isStop = true;
+            stopSelf();
+            XLog.e("Mock location stopped: " + e);
         }
     }
 
@@ -311,7 +339,7 @@ public class ServiceGo extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (action != null) {
+            if (action != null && mJoyStick != null) {
                 if (action.equals(SERVICE_GO_NOTE_ACTION_JOYSTICK_SHOW)) {
                     mJoyStick.show();
                 }
@@ -325,6 +353,7 @@ public class ServiceGo extends Service {
 
     public class ServiceGoBinder extends Binder {
         public void setPosition(double lng, double lat, double alt) {
+            if (!initialized || isStop) return;
             mLocHandler.removeMessages(HANDLER_MSG_ID);
             mCurLng = lng;
             mCurLat = lat;

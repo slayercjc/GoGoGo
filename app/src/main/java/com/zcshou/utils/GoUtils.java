@@ -78,45 +78,13 @@ public class GoUtils {
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
 
-    // 判断是否已在开发者选项中开启模拟位置权限（注意下面临时添加 @SuppressLint("wrongconstant") 以处理 addTestProvider 参数值的 lint 错误）
-    @SuppressLint("wrongconstant")
+    // Checking authorization must not replace/remove a running mock GPS provider.
     public static boolean isAllowMockLocation(Context context) {
-        boolean canMockPosition = false;
-        int index;
-
-        try {
-            LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);//获得LocationManager引用
-
-            List<String> list = locationManager.getAllProviders();
-            for (index = 0; index < list.size(); index++) {
-                if (list.get(index).equals(LocationManager.GPS_PROVIDER)) {
-                    break;
-                }
-            }
-
-            if (index < list.size()) {
-                // 注意，由于 android api 问题，下面的参数会提示错误(以下参数是通过相关API获取的真实GPS参数，不是随便写的)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    locationManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, false,
-                            false, true, true, true, ProviderProperties.POWER_USAGE_HIGH, ProviderProperties.ACCURACY_FINE);
-                } else {
-                    locationManager.addTestProvider(LocationManager.GPS_PROVIDER, false, true, false,
-                            false, true, true, true, Criteria.POWER_HIGH, Criteria.ACCURACY_FINE);
-                }
-                canMockPosition = true;
-            }
-
-            // 模拟位置可用
-            if (canMockPosition) {
-                // remove test provider
-                locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, false);
-                locationManager.removeTestProvider(LocationManager.GPS_PROVIDER);
-            }
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        }
-
-        return canMockPosition;
+        android.app.AppOpsManager ops = (android.app.AppOpsManager)
+                context.getSystemService(Context.APP_OPS_SERVICE);
+        return ops != null && ops.checkOpNoThrow(android.app.AppOpsManager.OPSTR_MOCK_LOCATION,
+                android.os.Process.myUid(), context.getPackageName())
+                == android.app.AppOpsManager.MODE_ALLOWED;
     }
 
     /**

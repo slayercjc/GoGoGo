@@ -29,14 +29,14 @@ import com.zcshou.utils.GoUtils;
 
 import java.util.ArrayList;
 
-public class WelcomeActivity extends AppCompatActivity {
+public class WelcomeActivity extends BaseActivity {
     private static SharedPreferences preferences;
     private static final String KEY_ACCEPT_AGREEMENT = "KEY_ACCEPT_AGREEMENT";
     private static final String KEY_ACCEPT_PRIVACY = "KEY_ACCEPT_PRIVACY";
 
-    private static boolean isPermission = false;
+    private boolean isPermission = false;
     private static final int SDK_PERMISSION_REQUEST = 127;
-    private static final ArrayList<String> ReqPermissions = new ArrayList<>();
+    private final ArrayList<String> ReqPermissions = new ArrayList<>();
 
     private CheckBox checkBox;
     private Boolean mAgreement;
@@ -79,44 +79,34 @@ public class WelcomeActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == SDK_PERMISSION_REQUEST) {
-            for (int i = 0; i < ReqPermissions.size(); i++) {
-                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                    GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_permission));
-                    return;
-                }
-            }
-            isPermission = true;
-        }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == SDK_PERMISSION_REQUEST) {
+            isPermission = hasLocationPermission();
+            if (!isPermission) {
+                GoUtils.DisplayToast(this, getString(R.string.app_error_permission));
+            }
+        }
+    }
+
+    private boolean hasLocationPermission() {
+        return checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     private void checkDefaultPermissions() {
-        // 定位精确位置
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        ReqPermissions.clear();
+        isPermission = hasLocationPermission();
+        if (!isPermission) {
             ReqPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        }
-
-        if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ReqPermissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
         }
-
-        /*
-         * 读写权限和电话状态权限非必要权限(建议授予)只会申请一次，用户同意或者禁止，只会弹一次
-         */
-        // 读写权限
-        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ReqPermissions.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (android.os.Build.VERSION.SDK_INT >= 33
+                && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                && !getPreferences(MODE_PRIVATE).getBoolean("notificationAsked", false)) {
+            ReqPermissions.add(Manifest.permission.POST_NOTIFICATIONS);
+            getPreferences(MODE_PRIVATE).edit().putBoolean("notificationAsked", true).apply();
         }
-
-        // 读取电话状态权限
-        if (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            ReqPermissions.add(Manifest.permission.READ_PHONE_STATE);
-        }
-
-        if (ReqPermissions.isEmpty()) {
-            isPermission = true;
-        } else {
+        if (!ReqPermissions.isEmpty()) {
             requestPermissions(ReqPermissions.toArray(new String[0]), SDK_PERMISSION_REQUEST);
         }
     }
@@ -137,7 +127,8 @@ public class WelcomeActivity extends AppCompatActivity {
             return;
         }
 
-        if (isPermission) {
+        if (hasLocationPermission()) {
+            ((GoApplication) getApplication()).initializeBaidu();
             Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
             startActivity(intent);
             WelcomeActivity.this.finish();
