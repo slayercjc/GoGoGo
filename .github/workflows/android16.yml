@@ -34,7 +34,7 @@ jobs:
       - name: Install Android SDK
         run: sdkmanager "platforms;android-36" "build-tools;35.0.0"
       - name: Validate signing inputs
-        if: inputs.mode == 'signed-apk'
+        if: inputs.mode == 'signed-apk' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[signed-apk]'))
         shell: bash
         env:
           BAIDU_MAP_AK: ${{ secrets.BAIDU_MAP_AK }}
@@ -55,12 +55,12 @@ jobs:
           BAIDU_MAP_AK: ${{ secrets.BAIDU_MAP_AK }}
         run: bash ./gradlew --no-daemon :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
       - name: Build release
-        if: inputs.mode == 'signed-apk'
+        if: inputs.mode == 'signed-apk' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[signed-apk]'))
         env:
           BAIDU_MAP_AK: ${{ secrets.BAIDU_MAP_AK }}
         run: bash ./gradlew --no-daemon :app:assembleRelease
       - name: Sign and verify APK
-        if: inputs.mode == 'signed-apk'
+        if: inputs.mode == 'signed-apk' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[signed-apk]'))
         shell: bash
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -85,9 +85,10 @@ jobs:
           "$tools/apksigner" sign --ks "$keyfile" --ks-key-alias "$ANDROID_KEY_ALIAS" --ks-pass env:ANDROID_STORE_PASSWORD --key-pass env:ANDROID_KEY_PASSWORD --out dist/GoGoGo-android16-candidate.apk "$RUNNER_TEMP/aligned.apk"
           "$tools/apksigner" verify --verbose --print-certs dist/GoGoGo-android16-candidate.apk > dist/signature-report.txt
           "$tools/zipalign" -c -P 16 -v 4 dist/GoGoGo-android16-candidate.apk > dist/zip-alignment.txt
+          grep -i 'certificate SHA-1 digest: cd6a44cd781be47f1490675e24e82759c900595b' dist/signature-report.txt
           sha256sum dist/GoGoGo-android16-candidate.apk > dist/SHA256SUMS.txt
       - name: Upload signed APK
-        if: inputs.mode == 'signed-apk'
+        if: inputs.mode == 'signed-apk' || (github.event_name == 'push' && contains(github.event.head_commit.message, '[signed-apk]'))
         uses: actions/upload-artifact@v4
         with:
           name: GoGoGo-Android16-signed
