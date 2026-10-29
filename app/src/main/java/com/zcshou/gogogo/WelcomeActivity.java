@@ -41,15 +41,26 @@ public class WelcomeActivity extends BaseActivity {
     private CheckBox checkBox;
     private Boolean mAgreement;
     private Boolean mPrivacy;
+    private boolean pendingEntry;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_welcome);
-
-        // 生成默认参数的值（一定要尽可能早的调用，因为后续有些界面可能需要使用参数）
         PreferenceManager.setDefaultValues(this, R.xml.preferences_main, false);
+        preferences = getSharedPreferences(KEY_ACCEPT_AGREEMENT, MODE_PRIVATE);
+        boolean accepted = preferences.getBoolean(KEY_ACCEPT_AGREEMENT, false)
+                && preferences.getBoolean(KEY_ACCEPT_PRIVACY, false);
+        // Existing users have already completed the old welcome flow.
+        if (!preferences.contains("onboarding_complete")) {
+            preferences.edit().putBoolean("onboarding_complete", accepted).apply();
+        }
+        if (accepted && preferences.getBoolean("onboarding_complete", false)) {
+            openMainActivity();
+            return;
+        }
+        pendingEntry = savedInstanceState != null && savedInstanceState.getBoolean("pendingEntry", false);
+        setContentView(R.layout.activity_welcome);
 
         Button startBtn = findViewById(R.id.startButton);
         startBtn.setOnClickListener(v -> startMainActivity());
@@ -82,7 +93,11 @@ public class WelcomeActivity extends BaseActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == SDK_PERMISSION_REQUEST) {
             isPermission = hasLocationPermission();
-            if (!isPermission) {
+            if (isPermission && pendingEntry) {
+                pendingEntry = false;
+                openMainActivity();
+            } else if (!isPermission) {
+                pendingEntry = false;
                 GoUtils.DisplayToast(this, getString(R.string.app_error_permission));
             }
         }
@@ -117,24 +132,27 @@ public class WelcomeActivity extends BaseActivity {
             return;
         }
 
-        if (!GoUtils.isNetworkAvailable(this)) {
-            GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_network));
-            return;
-        }
-
-        if (!GoUtils.isGpsOpened(this)) {
-            GoUtils.DisplayToast(this, getResources().getString(R.string.app_error_gps));
-            return;
-        }
-
         if (hasLocationPermission()) {
-            ((GoApplication) getApplication()).initializeBaidu();
-            Intent intent = new Intent(WelcomeActivity.this, MainActivity.class);
-            startActivity(intent);
-            WelcomeActivity.this.finish();
+            openMainActivity();
         } else {
+            pendingEntry = true;
             checkDefaultPermissions();
         }
+    }
+
+    private void openMainActivity() {
+        preferences.edit().putBoolean("onboarding_complete", true).apply();
+        ((GoApplication) getApplication()).initializeBaidu();
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle state) {
+        state.putBoolean("pendingEntry", pendingEntry);
+        super.onSaveInstanceState(state);
     }
 
     private void doAcceptation() {
@@ -308,3 +326,4 @@ public class WelcomeActivity extends BaseActivity {
         return builder;
     }
 }
+

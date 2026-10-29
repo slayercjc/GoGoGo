@@ -1,0 +1,3 @@
+<TextView xmlns:android="http://schemas.android.com/apk/res/android" android:id="@android:id/title"
+    android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingStart="6dp" android:paddingEnd="6dp"
+    android:paddingTop="24dp" android:paddingBottom="8dp" android:textSize="13sp" android:textStyle="bold" android:textColor="@color/colorPrimary"/>

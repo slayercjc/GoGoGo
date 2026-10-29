@@ -173,12 +173,19 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         super.onCreate(savedInstanceState);
         ((GoApplication) getApplication()).initializeBaidu();
         getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
-            @Override public void handleOnBackPressed() { moveTaskToBack(false); }
+            @Override public void handleOnBackPressed() {
+                DrawerLayout drawer = findViewById(R.id.drawer_layout);
+                if (searchItem != null && searchItem.isActionViewExpanded()) searchItem.collapseActionView();
+                else if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) drawer.closeDrawer(GravityCompat.START);
+                else moveTaskToBack(false);
+            }
         });
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        toolbar.setOnClickListener(v -> openSearch());
+        toolbar.setContentDescription(getString(R.string.search_hint_short));
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -218,6 +225,10 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         initSearchView();
 
         updater = new AppUpdater(this);
+        if (!hasMapLocationPermission()) {
+            requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION}, 128);
+        }
 
         // Custom builds are updated manually; upstream APKs use a different signature.
     }
@@ -264,7 +275,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         mSensorManager.unregisterListener(this);
 
         // 退出时销毁定位
-        mLocClient.stop();
+        if (mLocClient != null) mLocClient.stop();
         // 关闭定位图层
         mBaiduMap.setMyLocationEnabled(false);
         mMapView.onDestroy();
@@ -286,6 +297,10 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         //找到searchView
         searchItem = menu.findItem(R.id.action_search);
+        if (searchItem.getIcon() != null) {
+            androidx.core.graphics.drawable.DrawableCompat.setTint(searchItem.getIcon().mutate(),
+                    androidx.core.content.ContextCompat.getColor(this, R.color.colorPrimary));
+        }
         searchItem.setOnActionExpandListener(new  MenuItem.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
@@ -295,6 +310,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
             }
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
+                findViewById(R.id.toolbar).post(() -> focusSearch());
                 mSearchLayout.setVisibility(View.INVISIBLE);
                 //展示搜索历史
                 List<Map<String, Object>> data = getSearchHistory();
@@ -326,9 +342,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
         searchView = (SearchView) searchItem.getActionView();
         searchView.setQueryHint(getString(R.string.search_hint_short));
-        searchView.setIconified(false);// 设置searchView处于展开状态
-        searchView.onActionViewExpanded();// 当展开无输入内容的时候，没有关闭的图标
-        searchView.setIconifiedByDefault(true);//默认为true在框内，设置false则在框外
+        searchView.setIconifiedByDefault(false);
         searchView.setSubmitButtonEnabled(false);//显示提交按钮
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -580,6 +594,7 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
 
     //开启地图的定位图层
     private void initMapLocation() {
+        if (!hasMapLocationPermission() || mLocClient != null) return;
         try {
             // 定位初始化
             mLocClient = new LocationClient(this);
@@ -1211,6 +1226,39 @@ public class MainActivity extends BaseActivity implements SensorEventListener {
     }
 
     /*============================== 更新 相关 ==============================*/
+    private void openSearch() {
+        if (searchItem == null) return;
+        if (!searchItem.isActionViewExpanded()) searchItem.expandActionView();
+        focusSearch();
+    }
+
+    private void focusSearch() {
+        if (searchView == null) return;
+        searchView.requestFocus();
+        searchView.post(() -> {
+            View input = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
+            if (input == null || !searchItem.isActionViewExpanded()) return;
+            input.requestFocus();
+            android.view.inputmethod.InputMethodManager keyboard =
+                    (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            if (keyboard != null) keyboard.showSoftInput(input, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
+        });
+    }
+
+    private boolean hasMapLocationPermission() {
+        return checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                || checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int code, @NonNull String[] permissions, @NonNull int[] results) {
+        super.onRequestPermissionsResult(code, permissions, results);
+        if (code == 128) {
+            if (hasMapLocationPermission()) initMapLocation();
+            else GoUtils.DisplayToast(this, "未授予定位权限，仍可浏览地图；开启定位需在系统设置中授权");
+        }
+    }
+
     private void updateLocationPanel() {
         if (mButtonStart == null) return;
         TextView status = findViewById(R.id.location_status);
