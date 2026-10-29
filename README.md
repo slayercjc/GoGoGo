@@ -6,7 +6,7 @@
 
 **虚拟定位 · 自由探索**
 
-蓝紫色原生 Android 定位工具，由 **Slayercjc** 维护，基于 [ZCShou/GoGoGo](https://github.com/ZCShou/GoGoGo) v1.12.2 修改。
+Android 定位工具，由 **Slayercjc** 维护，基于 [ZCShou/GoGoGo](https://github.com/ZCShou/GoGoGo) v1.12.2 修改。
 
 [下载安装](https://github.com/slayercjc/GoGoGo/releases) · [问题反馈](https://github.com/slayercjc/GoGoGo/issues/new/choose) · [源码分支](https://github.com/slayercjc/GoGoGo/tree/android16-baidu) · [开发者](https://github.com/slayercjc)
 
