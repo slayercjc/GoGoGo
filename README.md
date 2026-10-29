@@ -1,83 +1,87 @@
-# 影梭
+<div align="center">
 
-影梭（VirtGO）是一款 Android 位置模拟应用，支持地图选点、位置搜索、坐标输入、线路移动和悬浮摇杆，并提供位置与线路的收藏、历史记录和 GPX 导入导出。“影”寓意位置的影子，“梭”寓意在位置与线路之间穿梭。
+<img src="https://raw.githubusercontent.com/slayercjc/GoGoGo/android16-baidu/docs/huanwei-icon.svg" width="112" alt="幻位图标" />
 
-[查看发布版本](https://github.com/ZCShou/GoGoGo/releases) · [问题反馈](https://github.com/ZCShou/GoGoGo/issues)
+# 幻位 · HuanWei
 
-## 1. 功能
+**虚拟定位 · 自由探索**
 
-影梭将位置选择、线路编辑与运行控制集中在一个应用中，既能固定到一个位置，也能沿线路或通过摇杆连续移动。本页介绍当前维护版本的功能；下载历史版本时，请同时查看对应 Release 的功能与系统要求。
+蓝紫色原生 Android 定位工具，由 **Slayercjc** 维护，基于 [ZCShou/GoGoGo](https://github.com/ZCShou/GoGoGo) v1.12.2 修改。
 
-![影梭的位置、线路与运行控制功能](images/feature-overview.png)
+[下载安装](https://github.com/slayercjc/GoGoGo/releases) · [问题反馈](https://github.com/slayercjc/GoGoGo/issues/new/choose) · [源码分支](https://github.com/slayercjc/GoGoGo/tree/android16-baidu) · [开发者](https://github.com/slayercjc)
 
-### 1.1 位置选择与模拟
+</div>
 
-在位置页点击地图、搜索地点，或直接输入经纬度，选择目标后启动位置模拟。地图支持普通、卫星和夜间显示，便于在不同环境下查看位置。
+## 当前开发版本
 
-- 在地图上选择位置，查看坐标与地点信息。
-- 通过地点搜索或坐标输入定位到目标位置。
-- 保存常用地点，查看和重新选择位置历史。
-- 启动、停止位置模拟，并在运行通知中查看服务状态。
+**幻位 1.1** · Android 16 适配分支：`android16-baidu`。
 
-### 1.2 线路编辑与移动
+本仓库的默认分支 master 保留上游代码；幻位的功能修改、构建工作流和文档位于 **android16-baidu**。下载、构建和提交改动时请选对分支。README 同步展示在仓库首页，不代表 master 的源码已经替换。
 
-在线路页依次选择多个位置形成线路，保存后可从历史记录中重新选择和编辑。运行时按线路节点模拟连续移动，而不只改变一个固定坐标。
+## 功能
 
-- 添加、调整和删除线路节点，查看线路距离与时长。
-- 命名和保存线路，管理线路历史及收藏。
-- 导入、导出 GPX 文件，复用已有地点和线路数据。
-- 根据运动参数控制线路移动速度及位置更新行为。
+- 百度地图地点搜索、地图选点、坐标输入和普通／卫星地图切换。
+- Android 模拟位置服务，以及悬浮摇杆移动。
+- 定位历史与搜索历史。
+- 与应用图标配套的蓝紫色界面、悬浮工具栏、可收起的定位卡片和独立停止按钮。
+- 跟随系统的浅色／深色界面；地图底图仍由百度 SDK 提供。
+- 从本仓库 Releases 检查更新，可选择仅 Wi-Fi 自动下载，校验后调用系统安装器。
+- 应用内问题反馈直达本项目 Issues。
 
-线路从节点选择开始，经过保存和选择后再启动移动。下图说明功能流程，并非实际地图或运行轨迹截图。
+## 下载与使用
 
-![影梭线路编辑与移动流程](images/route-workflow.png)
+1. 在 [Releases](https://github.com/slayercjc/GoGoGo/releases) 下载正式签名 APK；如尚未发布，请在 [Actions](https://github.com/slayercjc/GoGoGo/actions/workflows/android16.yml) 成功的签名构建中下载 `HuanWei-signed` 并解压。
+2. 安装后按界面提示授予定位、通知和悬浮窗权限。
+3. 打开手机开发者选项，在“选择模拟位置信息应用”中选择 **幻位**。
+4. 在地图上选点或搜索地点，点击“开始定位”；运行时可选新位置传送，点击“停止”结束。
 
-### 1.3 悬浮摇杆
+覆盖升级请使用同一签名的安装包，无需先卸载。幻位 1.0 尚无应用内下载更新功能，需要手动安装一次 1.1。系统仍可能要求确认安装，应用不承诺静默安装。
 
-取得悬浮窗权限后，可以通过悬浮摇杆控制移动方向，在查看其他页面时继续调整模拟位置。摇杆支持圆形和按钮两种样式，以及不同显示尺寸。
+## 兼容情况
 
-- 切换步行、跑步、骑行速度模式，并调整各模式速度。
-- 显示或隐藏摇杆，控制其样式和尺寸。
-- 在系统允许的后台条件下维持位置模拟服务。
+| 项目 | 当前情况 |
+| --- | --- |
+| 最低系统 | Android 8.1（API 27） |
+| 编译／目标 API | Android 16（API 36） |
+| 安装包架构 | arm64-v8a |
+| 已有使用反馈 | 小米 15 Pro / HyperOS 3.0.309.0，前一签名版用户反馈基本可用 |
+| 新界面与更新流程 | 以 Actions 检查和后续真机测试结果为准 |
 
-### 1.4 收藏与参数设置
+不同手机系统和其他应用对模拟位置的处理可能不同。不能保证所有应用采用模拟位置，也不保证所有 Android 16 设备均可用。ZIP 对齐检查不等于完整的 16 KB 原生库兼容认证。
 
-常用位置和线路可通过收藏、分组及置顶进行整理。运动设置用于调整速度、海拔、方向、卫星数量、定位精度及更新间隔；参数是否被其他应用采用，仍取决于系统与目标应用的处理方式。
+## 自己编译与百度地图接入
 
-### 1.5 独立安装实例
+使用 JDK 17、Gradle Wrapper 和 Android SDK 36。地图使用百度 Android SDK，需要申请自己的 AK，绑定 **包名 + APK 签名证书 SHA-1**。
 
-影梭可在满足应用内账号与会员条件时创建自身的独立安装实例，设置独立的应用名称、包名和地图配置，用于分别管理不同的配置与数据。该功能创建的是影梭自身的分身，不是任意第三方应用的多开容器。
+- 包名：`com.zcshou.gogogo`（保持与现有安装和百度 AK 一致）。
+- AK 通过 `BAIDU_MAP_AK` 环境变量或 Gradle 属性注入，不写死在源码中。
+- GitHub Actions 签名构建所需 Secrets：`BAIDU_MAP_AK`、`ANDROID_KEYSTORE_BASE64`、`ANDROID_STORE_PASSWORD`、`ANDROID_KEY_ALIAS`、`ANDROID_KEY_PASSWORD`。
+- Debug 与 Release 证书不同；只为 Release 证书配置的 AK 不一定能让本地 Debug 地图正常显示。
 
-创建和安装过程会检查包信息、签名与授权状态。地图配置应与实例的实际包名和签名对应，具体要求以应用内提示为准。
+详细步骤：[百度地图申请、签名与 GitHub 云编译教程](https://github.com/slayercjc/GoGoGo/blob/android16-baidu/docs/BAIDU_GITHUB_GUIDE.zh-CN.md)。
 
-## 2. 安装与启动
+```bash
+git clone --branch android16-baidu https://github.com/slayercjc/GoGoGo.git
+cd GoGoGo
+./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
+```
 
-当前维护版本面向 Android 10 及以上系统，正式发布包使用 ARM64（`arm64-v8a`）架构。历史发布版本的系统要求可能不同，下载时以对应版本说明为准。
+## 发布与自动更新
 
-### 2.1 取得应用
+发布新版本时递增 `versionCode`，设置新的 `versionName`，沿用原有签名。构建会从实际 APK 自动生成 `update.json`，包含版本、文件长度与 SHA-256。把它与 APK 一起上传到最新正式 Release，应用才能识别和下载。
 
-从 [GitHub Releases](https://github.com/ZCShou/GoGoGo/releases) 选择需要的版本，在 Assets 中下载 APK 并安装。应用内“关于影梭”可查看当前版本和检查更新。
+应用下载后还会校验包名、版本和签名。下载由 Android 系统管理；无网络或 GitHub 暂不可达时可稍后重试。
 
-### 2.2 配置权限
+完整操作：[发布新版和自动更新说明](https://github.com/slayercjc/GoGoGo/blob/android16-baidu/docs/RELEASING.zh-CN.md)。
 
-位置模拟通过 Android 的模拟位置接口工作，通常不需要 Root。首次使用时，需要按应用提示授予定位权限，并在系统开发者选项中将影梭选为“模拟位置信息应用”；使用摇杆还需要允许悬浮窗。
+## 问题反馈
 
-![影梭首次使用的权限与启动步骤](images/quick-start.png)
+请到 [Issues](https://github.com/slayercjc/GoGoGo/issues) 提交手机型号、系统版本、幻位版本、问题描述和复现步骤。地图空白请附百度鉴权错误码（如有），**不要提交 AK、签名私钥或密码**。提交截图或日志前请自行隐藏不希望公开的地址、坐标等信息。
 
-完成配置后，回到影梭选择一个位置或线路并启动。模拟位置应用的设置入口、后台运行与电池管理规则会随手机系统不同而变化。
+## 开源与致谢
 
-### 2.3 运行条件
+本分支没有新增收费解锁、支付 SDK 或订阅功能。百度地图服务的额度和收费以百度开放平台当前规则为准。
 
-后台持续运行、通知和定位权限会影响模拟服务的可用性。部分模拟及独立实例能力需要满足应用内显示的账号与会员条件；具体套餐和权限范围以当前版本界面为准。
+感谢原作者 **ZCShou** 和 GoGoGo 贡献者，以及百度地图 SDK、AndroidX、Material Components 等项目。上游版权声明保留，代码按仓库 [GPL-3.0 许可证](https://github.com/slayercjc/GoGoGo/blob/android16-baidu/LICENSE) 分发；第三方组件遵循各自许可证。
 
-## 3. 使用与反馈
-
-位置模拟适合应用开发、地图与定位流程验证等场景。设置模拟位置不代表所有应用都会采纳相同结果，系统定位策略、坐标系、缓存和目标应用自身逻辑都可能影响显示。
-
-### 3.1 定位结果检查
-
-遇到位置偏差或未生效时，先检查模拟位置应用设置、定位权限和后台运行状态，再停止并重新启动模拟，在目标应用中刷新位置。地图显示坐标与系统位置坐标可能使用不同坐标系，不宜只比较界面上的数字判断是否出错。
-
-### 3.2 问题反馈
-
-通过 [GitHub Issues](https://github.com/ZCShou/GoGoGo/issues) 或应用内“帮助与反馈”提交问题时，请提供影梭版本、手机型号、Android 版本、使用的位置或线路模式、权限状态与复现步骤。分享地图、线路文件或截图前，请检查是否包含家庭地址等个人信息。
+本工具用于开发、学习和获授权的定位测试。

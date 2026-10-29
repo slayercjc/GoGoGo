@@ -1,29 +1,11 @@
-<p align="center">
-<img src="./docs/LOGO.png" height="80"/>
-</p>
+# HuanWei · 幻位
 
-<div align="center">
+An Android mock-location tool maintained by Slayercjc, based on ZCShou/GoGoGo v1.12.2.
 
-[![GitHub stars](https://img.shields.io/github/stars/ZCShou/GoGoGo?logo=github)](https://github.com/ZCShou/GoGoGo/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/ZCShou/GoGoGo?logo=github)](https://github.com/ZCShou/GoGoGo/network)
-[![license](https://img.shields.io/github/license/ZCShou/GoGoGo)](https://github.com/ZCShou/GoGoGo/blob/master/LICENSE)
-[![GitHub Release](https://img.shields.io/github/v/release/ZCShou/GoGoGo?label=Release)](https://github.com/ZCShou/GoGoGo/releases)
-[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
-</div>
-<div align="center">
+The active branch is [android16-baidu](https://github.com/slayercjc/GoGoGo/tree/android16-baidu). The default master branch retains upstream code.
 
-[![Build Check](https://github.com/ZCShou/GoGoGo/actions/workflows/build-check.yml/badge.svg)](https://github.com/ZCShou/GoGoGo/actions/workflows/build-check.yml)
-[![CodeQL](https://github.com/ZCShou/GoGoGo/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/ZCShou/GoGoGo/actions/workflows/codeql-analysis.yml)
-</div>
+HuanWei 1.1 adds a blue-violet day/night interface, a location control card, GitHub Release update checks, verified APK downloads and links to this repository's Issues. Android 8.1+ / arm64-v8a; targets Android 16. Device testing is still required.
 
-<div align="center">
-GoGoGo - A mock location app without root on android 8.0+.
-</div>
+[Chinese README and setup guide](https://github.com/slayercjc/GoGoGo/blob/android16-baidu/README.md) · [Releases](https://github.com/slayercjc/GoGoGo/releases) · [Issues](https://github.com/slayercjc/GoGoGo/issues)
 
-##
-
-[Refrence Chinese, please](./README.md)
-
-## License
-GPL-3.0-only © ZCShou
-
+GPL-3.0. Original upstream attribution and third-party licenses are retained.

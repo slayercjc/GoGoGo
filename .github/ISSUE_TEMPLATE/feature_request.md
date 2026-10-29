@@ -1,29 +1,13 @@
 ---
-name: 需求、功能、建议 / Demands, functions, suggestions
-about: If you have please use this template.demands, functions or suggestions, please
-  use this template.
-title: "[Feature] New function"
-labels: feature
+name: 功能建议
+about: 为幻位提出功能或界面建议
+title: '[建议] '
+labels: ''
 assignees: ''
-
 ---
 
-<!-- ⚠️⚠️ 不要删除这些注释 ⚠️⚠️ -->
-<!-- ⚠️⚠️ DO NOT Delete those comments! ⚠️⚠️ -->
-<!-- 请先搜索有无同类需求，避免提交重复需求 -->
-<!-- Please search existing demands to avoid creating duplicates. -->
+### 希望解决的问题
 
-### 描述 / Description
+### 建议的使用方式
 
-
-
-<!-- 请在上方详细地描述你的需求、功能、建议。 -->
-<!-- Please describe your demands, functions, suggestions above. -->
-
-### 必要性 / Necessity
-
-
-
-<!-- 请在上方详细地描述该需求、功能、建议 的必要性。 -->
-<!-- Please describe why you need the demands, functions, suggestions. -->
-
+### 示例或参考（可选）
