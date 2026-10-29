@@ -19,6 +19,7 @@ public class SettingsActivity extends BaseActivity {
         getWindow().setStatusBarColor(getResources().getColor(R.color.page_background, this.getTheme()));
 
         setContentView(R.layout.activity_settings);
+        setSupportActionBar(findViewById(R.id.settings_toolbar));
         
         if (savedInstanceState == null) {
             getSupportFragmentManager()

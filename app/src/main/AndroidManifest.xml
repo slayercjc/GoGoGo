@@ -103,6 +103,7 @@
 
         <activity
             android:name=".SettingsActivity"
+            android:theme="@style/AppTheme.NoActionBar"
             android:label="@string/app_settings"
             android:exported="false" />
 
