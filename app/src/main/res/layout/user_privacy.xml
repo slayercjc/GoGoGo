@@ -35,21 +35,45 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="8dp"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/tv_cancel"
-            android:layout_width="100dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:minWidth="0dp"
+            android:minHeight="48dp"
+            android:paddingHorizontal="8dp"
+            android:singleLine="true"
+            android:maxLines="1"
+            android:textSize="14sp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeMaxTextSize="14sp"
+            android:autoSizeStepGranularity="1sp"
             android:layout_height="wrap_content"
             android:text="@string/app_btn_disagree"/>
 
         <Space
-            android:layout_width="60dp"
+            android:layout_width="12dp"
             android:layout_height="match_parent"/>
 
         <Button
             android:id="@+id/tv_agree"
-            android:layout_width="100dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:minWidth="0dp"
+            android:minHeight="48dp"
+            android:paddingHorizontal="8dp"
+            android:singleLine="true"
+            android:maxLines="1"
+            android:textSize="14sp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeMaxTextSize="14sp"
+            android:autoSizeStepGranularity="1sp"
             android:layout_height="wrap_content"
             android:text="@string/app_btn_agree"/>
     </LinearLayout>
