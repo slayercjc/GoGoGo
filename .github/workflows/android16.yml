@@ -115,7 +115,7 @@ jobs:
 
 
   publish:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[publish-release]'))
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -130,4 +130,28 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.ref_name }}
-        run: gh release create "$RELEASE_TAG" dist/*.apk dist/update.json dist/SHA256SUMS.txt --verify-tag --generate-notes --title "幻位 $RELEASE_TAG" --latest
+        run: |
+          set -euo pipefail
+          version=$(python -c 'import json; print(json.load(open("dist/update.json"))["versionName"])')
+          tag="v$version"
+          if [[ "$GITHUB_REF" == refs/tags/* && "$RELEASE_TAG" != "$tag" ]]; then
+            echo "::error::Release tag does not match APK version"
+            exit 1
+          fi
+          (cd dist && sha256sum --check SHA256SUMS.txt)
+          cat > release-notes.md <<'NOTES'
+          ## 幻位
+          安装下方 HuanWei 开头的 APK 即可。同一签名可直接覆盖旧版，保留设置和历史记录。
+          
+          ### 本版改进
+          - 顶部搜索栏整块可点击，右侧搜索图标适配深浅色主题。
+          - 设置页采用分组圆角卡片，突出参数和开关。
+          - 首次阅读并进入后，后续启动直接打开地图主页。
+          - 支持从本仓库检查更新、可选 Wi-Fi 自动下载，校验后调用系统安装器。
+          
+          APK 已通过编译、单元测试、Lint 和签名验证；不同设备仍需实际验证。
+          
+          update.json 和 SHA256SUMS.txt 用于自动更新及文件校验，普通用户只需下载 APK。
+          源码基于 ZCShou/GoGoGo，保留 GPL-3.0 许可证与原作者声明。
+          NOTES
+          gh release create "$tag" dist/*.apk dist/update.json dist/SHA256SUMS.txt --target "$GITHUB_SHA" --notes-file release-notes.md --title "幻位 $version" --latest
