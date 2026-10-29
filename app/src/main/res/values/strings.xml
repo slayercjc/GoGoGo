@@ -18,7 +18,7 @@
     </string>
     <string name="app_privacy">隐私政策</string>
     <string name="app_privacy_content">1. 地图显示、搜索和定位功能使用百度地图与定位 SDK，相关网络请求和信息处理遵循百度开放平台的隐私政策。应用在你同意后初始化 SDK。\n\n2. 搜索历史、定位历史和运行日志保存在本机。问题反馈会打开 GitHub；你提交的内容可能公开，请先隐藏私人地址和坐标。\n\n3. 打开应用时默认每天最多一次访问 GitHub Releases 检查更新，可在设置中关闭。请求包含应用版本和网络连接所需的信息，不上传位置历史。Wi-Fi 自动下载默认关闭。\n\n4. 更新安装包由 GitHub 下载，校验通过后交给 Android 系统安装。应用不会上传签名私钥或要求输入 GitHub 密码。\n\n5. 更多信息请查阅项目 README、百度开放平台和 GitHub 的隐私说明。</string>
-    <string name="app_agreement_privacy">已阅读《用户协议》和《隐私政策》</string>
+    <string name="app_agreement_privacy">同意《用户协议》和《隐私政策》</string>
     <string name="app_error_agreement">必须先接受\n《用户协议》和《隐私政策》</string>
     <string name="app_error_read">请依次阅读并接受\n《用户协议》和《隐私政策》</string>
     <string name="app_error_gps">定位不可用，请检查 GPS 是否开启</string>

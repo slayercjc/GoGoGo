@@ -8,7 +8,7 @@
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="24dp" android:text="@string/welcome_description" android:textColor="@color/brand_text" android:textSize="15sp" android:lineSpacingExtra="6dp"/>
         </com.google.android.material.card.MaterialCardView>
         <com.google.android.material.button.MaterialButton android:id="@+id/startButton" android:layout_width="match_parent" android:layout_height="56dp" android:layout_marginTop="32dp" android:text="@string/welcome_btn_txt" app:cornerRadius="18dp"/>
-        <CheckBox android:id="@+id/check_agreement" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="48dp" android:layout_marginTop="16dp" android:gravity="center_vertical" android:text="@string/app_agreement_privacy" android:textSize="13sp" android:textColor="@color/text_muted"/>
+        <CheckBox android:id="@+id/check_agreement" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="48dp" android:layout_marginTop="16dp" android:gravity="center_vertical" android:text="@string/app_agreement_privacy" android:maxLines="1" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="10sp" android:autoSizeMaxTextSize="13sp" android:autoSizeStepGranularity="1sp" android:textSize="13sp" android:textColor="@color/text_muted"/>
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:text="@string/brand_developer" android:textSize="12sp" android:textColor="@color/text_muted"/>
     </LinearLayout>
 </ScrollView>
